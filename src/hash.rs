@@ -77,12 +77,10 @@ impl Buster {
                         self.copy(path, &new_name);
 
                         let (source, destination) = self.gen_map(path, &&new_name);
-                        file_map
-                            .add(
-                                source.to_str().unwrap().into(),
-                                destination.to_str().unwrap().into(),
-                            )
-                            .unwrap();
+                        let _ = file_map.add(
+                            source.to_str().unwrap().into(),
+                            destination.to_str().unwrap().into(),
+                        );
                     }
                 }
             }
@@ -121,12 +119,10 @@ impl Buster {
                         );
                         self.copy(path, &new_name);
                         let (source, destination) = self.gen_map(path, &&new_name);
-                        file_map
-                            .add(
-                                source.to_str().unwrap().into(),
-                                destination.to_str().unwrap().into(),
-                            )
-                            .unwrap();
+                        let _ = file_map.add(
+                            source.to_str().unwrap().into(),
+                            destination.to_str().unwrap().into(),
+                        );
                     }
                 }
             }
@@ -188,7 +184,7 @@ impl Buster {
 }
 
 #[cfg(test)]
-mod tests {
+pub mod tests {
     use super::*;
 
     #[test]
@@ -218,6 +214,7 @@ mod tests {
 
             assert_eq!(src.exists(), dest.exists());
         }
+        cleanup(&config);
     }
 
     #[test]
@@ -239,7 +236,7 @@ mod tests {
             .unwrap();
 
         config.init().unwrap();
-        let mut files = config.try_hash().unwrap();
+        let mut files = config.hash().unwrap();
 
         for (k, v) in files.map.drain() {
             let src = Path::new(&k);
@@ -247,5 +244,11 @@ mod tests {
 
             assert_eq!(src.exists(), dest.exists());
         }
+
+        cleanup(&config);
+    }
+
+    pub fn cleanup(config: &Buster) {
+        let _ = fs::remove_dir_all(&config.result);
     }
 }
