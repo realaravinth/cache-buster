@@ -1,0 +1,20 @@
+[package]
+name = "cache-buster"
+version = "0.1.0"
+authors = ["realaravinth <realaravinth@batsense.net>"]
+edition = "2018"
+license = "MIT OR Apache-2.0"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+name = "cache_buster"
+path = "src/lib.rs"
+
+[dependencies]
+mime_guess = "2.0.3"
+mime = "0.3.16"
+sha2 = "0.9.3"
+derive_builder = "0.10.0"
+data-encoding = "2.3.2"
+walkdir = "2"
