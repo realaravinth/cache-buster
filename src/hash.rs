@@ -214,4 +214,33 @@ mod tests {
             assert_eq!(src.exists(), dest.exists());
         }
     }
+
+    #[test]
+    fn try_hash_works() {
+        let types = vec![
+            mime::IMAGE_PNG,
+            mime::IMAGE_SVG,
+            mime::IMAGE_JPEG,
+            mime::IMAGE_GIF,
+        ];
+
+        let config = BusterBuilder::default()
+            .source("./dist")
+            .result("/tmp/prod")
+            .mime_types(types)
+            .copy(true)
+            .follow_links(true)
+            .build()
+            .unwrap();
+
+        config.init().unwrap();
+        let mut map = config.hash().unwrap();
+
+        for (k, v) in map.drain() {
+            let src = Path::new(&k);
+            let dest = Path::new(&v);
+
+            assert_eq!(src.exists(), dest.exists());
+        }
+    }
 }
