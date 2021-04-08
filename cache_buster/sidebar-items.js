@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["hash",""]]});
+initSidebarItems({"mod":[["hash",""],["map",""]]});
