@@ -17,6 +17,7 @@ dependencies = [
  "derive_builder",
  "mime",
  "mime_guess",
+ "serde",
  "sha2",
  "walkdir",
 ]
@@ -185,6 +186,12 @@ checksum = "93fc1dc3aaa9bfed95e02e6eadabb4baf7e3078b0bd1b4d7b6b0b68378900502"
 dependencies = [
  "winapi-util",
 ]
+
+[[package]]
+name = "serde"
+version = "1.0.125"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "558dc50e1a5a5fa7112ca2ce4effcb321b0300c0d4ccf0776a9f60cd89031171"
 
 [[package]]
 name = "sha2"

@@ -33,4 +33,6 @@
 //! ```
 
 pub mod hash;
+pub mod map;
 pub use hash::BusterBuilder;
+pub use map::Files;

@@ -5,13 +5,14 @@
 * License.
 */
 
-use std::collections::HashMap;
 use std::io::Error;
 use std::path::Path;
 use std::{fs, path::PathBuf};
 
 use derive_builder::Builder;
 use walkdir::WalkDir;
+
+use crate::map::Files;
 
 #[derive(Debug, Clone, Builder)]
 pub struct Buster {
@@ -52,8 +53,8 @@ impl Buster {
     // use [hash] when when they aren't
     //
     // doesn't process files for which mime is not resolved
-    pub fn try_hash(&self) -> Result<HashMap<String, String>, Error> {
-        let mut file_map: HashMap<String, String> = HashMap::default();
+    pub fn try_hash(&self) -> Result<Files, Error> {
+        let mut file_map: Files = Files::default();
         for entry in WalkDir::new(&self.source)
             .follow_links(self.follow_links)
             .into_iter()
@@ -76,10 +77,12 @@ impl Buster {
                         self.copy(path, &new_name);
 
                         let (source, destination) = self.gen_map(path, &&new_name);
-                        file_map.insert(
-                            source.to_str().unwrap().into(),
-                            destination.to_str().unwrap().into(),
-                        );
+                        file_map
+                            .add(
+                                source.to_str().unwrap().into(),
+                                destination.to_str().unwrap().into(),
+                            )
+                            .unwrap();
                     }
                 }
             }
@@ -90,8 +93,8 @@ impl Buster {
 
     // panics when mimetypes are detected. This way you'll know which files are ignored
     // from processing
-    pub fn hash(&self) -> Result<HashMap<String, String>, Error> {
-        let mut file_map: HashMap<String, String> = HashMap::default();
+    pub fn hash(&self) -> Result<Files, Error> {
+        let mut file_map: Files = Files::default();
 
         for entry in WalkDir::new(&self.source)
             .follow_links(self.follow_links)
@@ -118,10 +121,12 @@ impl Buster {
                         );
                         self.copy(path, &new_name);
                         let (source, destination) = self.gen_map(path, &&new_name);
-                        file_map.insert(
-                            source.to_str().unwrap().into(),
-                            destination.to_str().unwrap().into(),
-                        );
+                        file_map
+                            .add(
+                                source.to_str().unwrap().into(),
+                                destination.to_str().unwrap().into(),
+                            )
+                            .unwrap();
                     }
                 }
             }
@@ -205,9 +210,9 @@ mod tests {
             .unwrap();
 
         config.init().unwrap();
-        let mut map = config.hash().unwrap();
+        let mut files = config.hash().unwrap();
 
-        for (k, v) in map.drain() {
+        for (k, v) in files.map.drain() {
             let src = Path::new(&k);
             let dest = Path::new(&v);
 
@@ -234,9 +239,9 @@ mod tests {
             .unwrap();
 
         config.init().unwrap();
-        let mut map = config.hash().unwrap();
+        let mut files = config.try_hash().unwrap();
 
-        for (k, v) in map.drain() {
+        for (k, v) in files.map.drain() {
             let src = Path::new(&k);
             let dest = Path::new(&v);
 
