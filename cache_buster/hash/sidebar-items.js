@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["BusterBuilderError","Error type for BusterBuilder"]],"struct":[["Buster",""],["BusterBuilder","Builder for `Buster`."]]});
