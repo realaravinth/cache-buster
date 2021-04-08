@@ -16,16 +16,16 @@
 
 - [x] `SHA-256` based name generation during compile-time
 - [x] Processes files based on provided MIME filters
-- [ ] Exposes modified names to program during runtime
+- [x] Exposes modified names to program during runtime
 
 ## Usage:
 
 Add this to your `Cargo.toml`:
 
 ```toml
-cache-buster = { version = "0.2", git = "https://github.com/realaravinth/cache-buster" }
+cache-buster = { version = "0.1", git = "https://github.com/realaravinth/cache-buster" }
 ```
 
 ## Examples:
 
-TODO
+See [acix-example](./actix-example)

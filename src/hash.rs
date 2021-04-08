@@ -236,7 +236,7 @@ pub mod tests {
             .unwrap();
 
         config.init().unwrap();
-        let mut files = config.hash().unwrap();
+        let mut files = config.try_hash().unwrap();
 
         for (k, v) in files.map.drain() {
             let src = Path::new(&k);
