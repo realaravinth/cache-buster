@@ -54,7 +54,7 @@ impl Buster {
     //
     // doesn't process files for which mime is not resolved
     pub fn try_hash(&self) -> Result<Files, Error> {
-        let mut file_map: Files = Files::default();
+        let mut file_map: Files = Files::new(&self.result);
         for entry in WalkDir::new(&self.source)
             .follow_links(self.follow_links)
             .into_iter()
@@ -92,7 +92,7 @@ impl Buster {
     // panics when mimetypes are detected. This way you'll know which files are ignored
     // from processing
     pub fn hash(&self) -> Result<Files, Error> {
-        let mut file_map: Files = Files::default();
+        let mut file_map: Files = Files::new(&self.result);
 
         for entry in WalkDir::new(&self.source)
             .follow_links(self.follow_links)

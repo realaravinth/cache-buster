@@ -12,7 +12,7 @@ use serde::{Deserialize, Serialize};
 
 const ENV_VAR_NAME: &str = "CACHE_BUSTER_FILE_MAP";
 
-#[derive(Debug, PartialEq, Default, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct Files {
     pub map: HashMap<String, String>,
     base_dir: String,
@@ -26,7 +26,15 @@ impl Files {
         }
     }
 
-    pub fn get<'a>(&'a self, path: &'a str) -> Option<&'a String> {
+    pub fn get<'a>(&'a self, path: &'a str) -> Option<&'a str> {
+        if let Some(path) = self.map.get(path) {
+            Some(&path[self.base_dir.len()..])
+        } else {
+            None
+        }
+    }
+
+    pub fn get_full_path<'a>(&'a self, path: &'a str) -> Option<&'a String> {
         self.map.get(path)
     }
 
@@ -70,7 +78,7 @@ mod tests {
     use std::path::Path;
 
     #[test]
-    fn get_works() {
+    fn get_full_path_works() {
         let types = vec![
             mime::IMAGE_PNG,
             mime::IMAGE_SVG,
@@ -90,19 +98,22 @@ mod tests {
         config.init().unwrap();
         let files = config.hash().unwrap();
 
-        assert!(file_exists("./dist/log-out.svg", &files));
-        assert!(file_exists(
+        assert!(get_full_path_runner("./dist/log-out.svg", &files));
+        assert!(get_full_path_runner(
             "./dist/a/b/c/d/s/d/svg/credit-card.svg",
             &files
         ));
 
-        assert!(!file_exists("dist/log-out.svg", &files));
-        assert!(!file_exists("dist/a/b/c/d/s/d/svg/credit-card.svg", &files));
+        assert!(!get_full_path_runner("dist/log-out.svg", &files));
+        assert!(!get_full_path_runner(
+            "dist/a/b/c/d/s/d/svg/credit-card.svg",
+            &files
+        ));
         cleanup(&config);
     }
 
-    fn file_exists(path: &str, files: &Files) -> bool {
-        if let Some(file) = files.get(path) {
+    fn get_full_path_runner(path: &str, files: &Files) -> bool {
+        if let Some(file) = files.get_full_path(path) {
             Path::new(file).exists()
         } else {
             false
@@ -137,5 +148,43 @@ mod tests {
         assert_eq!(files, x);
 
         cleanup(&config);
+    }
+
+    #[test]
+    fn get_works() {
+        let types = vec![
+            mime::IMAGE_PNG,
+            mime::IMAGE_SVG,
+            mime::IMAGE_JPEG,
+            mime::IMAGE_GIF,
+        ];
+
+        let config = BusterBuilder::default()
+            .source("./dist")
+            .result("/tmp/prod5")
+            .mime_types(types)
+            .copy(true)
+            .follow_links(true)
+            .build()
+            .unwrap();
+
+        config.init().unwrap();
+        let files = config.hash().unwrap();
+
+        assert!(get_runner("./dist/log-out.svg", &files));
+        assert!(get_runner("./dist/a/b/c/d/s/d/svg/credit-card.svg", &files));
+
+        assert!(!get_runner("dist/log-out.svg", &files));
+        assert!(!get_runner("dist/a/b/c/d/s/d/svg/credit-card.svg", &files));
+        cleanup(&config);
+    }
+
+    fn get_runner(path: &str, files: &Files) -> bool {
+        if let Some(file) = files.get(path) {
+            let path = Path::new(&files.base_dir).join(&file[1..]);
+            path.exists()
+        } else {
+            false
+        }
     }
 }

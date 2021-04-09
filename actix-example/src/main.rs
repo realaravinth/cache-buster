@@ -3,20 +3,23 @@ use cache_buster::Files;
 fn main() {
     let files = Files::load();
 
-    assert!(file_exists("../dist/log-out.svg", &files));
-    assert!(file_exists(
+    assert!(get_full_path_runner("../dist/log-out.svg", &files));
+    assert!(get_full_path_runner(
         "../dist/a/b/c/d/s/d/svg/credit-card.svg",
         &files
     ));
 
-    assert!(!file_exists("dist/log-out.svg", &files));
-    assert!(!file_exists("dist/a/b/c/d/s/d/svg/credit-card.svg", &files));
+    assert!(!get_full_path_runner("dist/log-out.svg", &files));
+    assert!(!get_full_path_runner(
+        "dist/a/b/c/d/s/d/svg/credit-card.svg",
+        &files
+    ));
 }
 
-fn file_exists(path: &str, files: &Files) -> bool {
+fn get_full_path_runner(path: &str, files: &Files) -> bool {
     use std::path::Path;
 
-    if let Some(file) = files.get(path) {
+    if let Some(file) = files.get_full_path(path) {
         Path::new(file).exists()
     } else {
         false
