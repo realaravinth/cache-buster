@@ -41,7 +41,7 @@ impl Buster {
         Ok(())
     }
 
-    fn hasher(payload: &str) -> String {
+    fn hasher(payload: &[u8]) -> String {
         use data_encoding::HEXUPPER;
         use sha2::{Digest, Sha256};
         let mut hasher = Sha256::new();
@@ -131,19 +131,14 @@ impl Buster {
         Ok(file_map)
     }
 
-    fn read_to_string(path: &Path) -> Result<String, Error> {
+    fn read_to_string(path: &Path) -> Result<Vec<u8>, Error> {
         use std::fs::File;
-        use std::io::{BufRead, BufReader};
+        use std::io::Read;
 
-        let input = File::open(path)?;
-        let buffered = BufReader::new(input);
-
-        let mut res = String::new();
-        for line in buffered.lines() {
-            res.push_str(&line?)
-        }
-
-        Ok(res)
+        let mut file_content = Vec::new();
+        let mut file = File::open(path)?;
+        file.read_to_end(&mut file_content).expect("Unable to read");
+        Ok(file_content)
     }
 
     fn gen_map<'a>(&self, source: &'a Path, name: &str) -> (&'a Path, PathBuf) {
