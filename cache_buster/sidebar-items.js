@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["hash",""],["map",""]]});
+initSidebarItems({"mod":[["filemap",""],["processor",""]]});
