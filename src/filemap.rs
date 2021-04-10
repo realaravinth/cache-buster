@@ -4,6 +4,17 @@
 * Use of this source code is governed by the Apache 2.0 and/or the MIT
 * License.
 */
+//! Module describing runtime compoenet for fetching modified filenames
+//!
+//! Add the following tou your program to load the filemap during compiletime:
+//!
+//! ```no_run
+//! use cache_buster::Files;
+//!
+//! fn main(){
+//!    let files = Files::load();
+//! }
+//! ```
 
 use std::collections::HashMap;
 use std::env;
@@ -12,13 +23,18 @@ use serde::{Deserialize, Serialize};
 
 const ENV_VAR_NAME: &str = "CACHE_BUSTER_FILE_MAP";
 
+/// Filemap struct
+///
+/// maps original names to generated names
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct Files {
+    /// filemap<original-path, modified-path>
     pub map: HashMap<String, String>,
     base_dir: String,
 }
 
 impl Files {
+    /// Initialize map
     pub fn new(base_dir: &str) -> Self {
         Files {
             map: HashMap::default(),
@@ -26,6 +42,10 @@ impl Files {
         }
     }
 
+    /// Get relative file path
+    ///
+    /// If the modified filename path is './prod/test.randomhash.svg`, it will
+    /// output `/test.randomhash.svg`. For full path, see [get_full_path]
     pub fn get<'a>(&'a self, path: &'a str) -> Option<&'a str> {
         if let Some(path) = self.map.get(path) {
             Some(&path[self.base_dir.len()..])
@@ -34,10 +54,15 @@ impl Files {
         }
     }
 
+    /// Get file path
+    ///
+    /// If the modified filename path is './prod/test.randomhash.svg`, it will
+    /// output `/prod/test.randomhash.svg`. For relative path, see [get]
     pub fn get_full_path<'a>(&'a self, path: &'a str) -> Option<&'a String> {
         self.map.get(path)
     }
 
+    /// Create file map: map original path to modified paths
     pub fn add(&mut self, k: String, v: String) -> Result<(), &'static str> {
         if self.map.contains_key(&k) {
             Err("key exists")
@@ -47,6 +72,8 @@ impl Files {
         }
     }
 
+    /// This crate uses compile-time environment variables to transfer
+    /// data to the main program. This funtction sets that variable
     pub fn to_env(&self) {
         println!(
             "cargo:rustc-env={}={}",
@@ -61,6 +88,7 @@ impl Files {
         env::set_var(ENV_VAR_NAME, serde_json::to_string(&self).unwrap());
     }
 
+    /// Load filemap in main program. Should be called from main program
     pub fn load() -> Self {
         let env = env::var(ENV_VAR_NAME)
             .expect("unable to read env var, might be a bug in lib. Please report on GitHub");
@@ -95,8 +123,7 @@ mod tests {
             .build()
             .unwrap();
 
-        config.init().unwrap();
-        let files = config.hash().unwrap();
+        let files = config.process().unwrap();
 
         assert!(get_full_path_runner("./dist/log-out.svg", &files));
         assert!(get_full_path_runner(
@@ -138,8 +165,7 @@ mod tests {
             .build()
             .unwrap();
 
-        config.init().unwrap();
-        let files = config.hash().unwrap();
+        let files = config.process().unwrap();
 
         files.to_env();
 
@@ -168,8 +194,7 @@ mod tests {
             .build()
             .unwrap();
 
-        config.init().unwrap();
-        let files = config.hash().unwrap();
+        let files = config.process().unwrap();
 
         assert!(get_runner("./dist/log-out.svg", &files));
         assert!(get_runner("./dist/a/b/c/d/s/d/svg/credit-card.svg", &files));

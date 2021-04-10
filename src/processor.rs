@@ -5,6 +5,39 @@
 * License.
 */
 
+//! Module describing file processor that changes filenames to setup cache-busting
+//!
+//! Run the following during build using `build.rs`:
+//!
+//! ```rust
+//! use cache_buster::BusterBuilder;
+//!
+//! fn main() {
+//!     // note: add error checking yourself.
+//!     //    println!("cargo:rustc-env=GIT_process={}", git_process);
+//!     let types = vec![
+//!         mime::IMAGE_PNG,
+//!         mime::IMAGE_SVG,
+//!         mime::IMAGE_JPEG,
+//!         mime::IMAGE_GIF,
+//!     ];
+//!
+//!     let config = BusterBuilder::default()
+//!         .source("./dist")
+//!         .result("./prod")
+//!         .mime_types(types)
+//!         .copy(true)
+//!         .follow_links(true)
+//!         .build()
+//!         .unwrap();
+//!
+//!     config.process().unwrap();
+//! }
+//! ```
+//!
+//! There's a runtime component to this library which will let you read modified
+//! filenames from within your program. See [Files]
+
 use std::io::Error;
 use std::path::Path;
 use std::{fs, path::PathBuf};
@@ -14,23 +47,26 @@ use walkdir::WalkDir;
 
 use crate::Files;
 
+/// Configuration for setting up cache-busting
 #[derive(Debug, Clone, Builder)]
 pub struct Buster {
-    // source directory
+    /// source directory
     #[builder(setter(into))]
     source: String,
-    // mime_types for hashing
+    /// mime_types for hashing
     mime_types: Vec<mime::Mime>,
-    // directory for writing results
+    /// directory for writing results
     #[builder(setter(into))]
     result: String,
-    // copy other non-hashed files from source dire to result dir?
+    /// copy other non-hashed files from source dire to result dir?
     copy: bool,
+    /// follow symlinks?
     follow_links: bool,
 }
 
 impl Buster {
-    pub fn init(&self) -> Result<(), Error> {
+    // creates base_dir to output files to
+    fn init(&self) -> Result<(), Error> {
         let res = Path::new(&self.result);
         if res.exists() {
             fs::remove_dir_all(&self.result).unwrap();
@@ -49,11 +85,16 @@ impl Buster {
         HEXUPPER.encode(&hasher.finalize())
     }
 
-    // if mime types are common, then you shoud be fine using this
-    // use [hash] when when they aren't
-    //
-    // doesn't process files for which mime is not resolved
-    pub fn try_hash(&self) -> Result<Files, Error> {
+    /// Processes files.
+    ///
+    /// If MIME types are uncommon, then use this funtion
+    /// as it won't panic when a weird MIM is encountered.
+    ///
+    /// Otherwise, use [process]
+    ///
+    /// Note: it omits processing uncommon MIME types
+    pub fn try_process(&self) -> Result<Files, Error> {
+        self.init()?;
         let mut file_map: Files = Files::new(&self.result);
         for entry in WalkDir::new(&self.source)
             .follow_links(self.follow_links)
@@ -89,9 +130,15 @@ impl Buster {
         Ok(file_map)
     }
 
-    // panics when mimetypes are detected. This way you'll know which files are ignored
-    // from processing
-    pub fn hash(&self) -> Result<Files, Error> {
+    /// Processes files.
+    ///
+    /// If MIME types are common, then use this funtion
+    /// as it will panic when a weird MIM is encountered.
+    pub fn process(&self) -> Result<Files, Error> {
+        // panics when mimetypes are detected. This way you'll know which files are ignored
+        // from processing
+
+        self.init()?;
         let mut file_map: Files = Files::new(&self.result);
 
         for entry in WalkDir::new(&self.source)
@@ -131,6 +178,7 @@ impl Buster {
         Ok(file_map)
     }
 
+    // helper fn to read file to string
     fn read_to_string(path: &Path) -> Result<Vec<u8>, Error> {
         use std::fs::File;
         use std::io::Read;
@@ -141,18 +189,21 @@ impl Buster {
         Ok(file_content)
     }
 
+    // helper fn to generate filemap
     fn gen_map<'a>(&self, source: &'a Path, name: &str) -> (&'a Path, PathBuf) {
         let rel_location = source.strip_prefix(&self.source).unwrap().parent().unwrap();
         let destination = Path::new(&self.result).join(rel_location).join(name);
         (source, destination)
     }
 
+    // helper fn to copy files
     fn copy(&self, source: &Path, name: &str) {
         let rel_location = source.strip_prefix(&self.source).unwrap().parent().unwrap();
         let destination = Path::new(&self.result).join(rel_location).join(name);
         fs::copy(source, &destination).unwrap();
     }
 
+    // helper fn to create directory structure in self.base_dir
     fn create_dir_structure(&self, path: &Path) -> Result<(), Error> {
         for entry in WalkDir::new(&path)
             .follow_links(self.follow_links)
@@ -193,15 +244,14 @@ pub mod tests {
 
         let config = BusterBuilder::default()
             .source("./dist")
-            .result("./prod")
+            .result("./prod56")
             .mime_types(types)
             .copy(true)
             .follow_links(true)
             .build()
             .unwrap();
 
-        config.init().unwrap();
-        let mut files = config.hash().unwrap();
+        let mut files = config.process().unwrap();
 
         for (k, v) in files.map.drain() {
             let src = Path::new(&k);
@@ -213,7 +263,7 @@ pub mod tests {
     }
 
     #[test]
-    fn try_hash_works() {
+    fn try_process_works() {
         let types = vec![
             mime::IMAGE_PNG,
             mime::IMAGE_SVG,
@@ -230,8 +280,7 @@ pub mod tests {
             .build()
             .unwrap();
 
-        config.init().unwrap();
-        let mut files = config.try_hash().unwrap();
+        let mut files = config.try_process().unwrap();
 
         for (k, v) in files.map.drain() {
             let src = Path::new(&k);

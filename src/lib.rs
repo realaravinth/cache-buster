@@ -4,13 +4,13 @@
 * Use of this source code is governed by the Apache 2.0 and/or the MIT
 * License.
 */
-
-//! ```rust
+#![warn(missing_docs, missing_debug_implementations, rust_2018_idioms)]
+//! ```no_run
 //! use cache_buster::BusterBuilder;
 //!
 //! fn main() {
 //!     // note: add error checking yourself.
-//!     //    println!("cargo:rustc-env=GIT_HASH={}", git_hash);
+//!     //    println!("cargo:rustc-env=GIT_process={}", git_process);
 //!     let types = vec![
 //!         mime::IMAGE_PNG,
 //!         mime::IMAGE_SVG,
@@ -27,8 +27,7 @@
 //!         .build()
 //!         .unwrap();
 //!
-//!     config.init().unwrap();
-//!     config.hash().unwrap();
+//!     config.process().unwrap();
 //! }
 //! ```
 
