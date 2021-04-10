@@ -1,5 +1,5 @@
 <div align="center">
-  <h1>cache-buster</h1>
+  <h1>Cache Buster</h1>
   <p>
     <strong>cache-buster - A library that aids in staticfile cache busting with SHA-258 hashes</strong>
   </p>
@@ -28,4 +28,6 @@ cache-buster = { version = "0.1", git = "https://github.com/realaravinth/cache-b
 
 ## Examples:
 
-See [acix-example](./actix-example)
+- See [acix-example](./actix-example)
+- See [mCaptcha/guard](https://github.com/mCaptcha/guard) for use
+  with [Sailfish](https://crates.io/crates/sailfish) template engine.
