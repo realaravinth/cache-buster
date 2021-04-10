@@ -12,7 +12,7 @@ use std::{fs, path::PathBuf};
 use derive_builder::Builder;
 use walkdir::WalkDir;
 
-use crate::map::Files;
+use crate::Files;
 
 #[derive(Debug, Clone, Builder)]
 pub struct Buster {

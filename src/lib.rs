@@ -32,7 +32,7 @@
 //! }
 //! ```
 
-pub mod hash;
-pub use hash::BusterBuilder;
-pub mod map;
-pub use map::Files;
+pub mod processor;
+pub use processor::BusterBuilder;
+pub mod filemap;
+pub use filemap::Files;

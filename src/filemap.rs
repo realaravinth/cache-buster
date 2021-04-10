@@ -71,8 +71,8 @@ impl Files {
 
 #[cfg(test)]
 mod tests {
-    use crate::hash::tests::cleanup;
-    use crate::hash::*;
+    use crate::processor::tests::cleanup;
+    use crate::processor::*;
 
     use super::*;
     use std::path::Path;
