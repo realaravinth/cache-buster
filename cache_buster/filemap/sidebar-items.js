@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["Files",""]]});
+initSidebarItems({"struct":[["Files","Filemap struct"]]});
