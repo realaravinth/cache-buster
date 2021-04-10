@@ -90,7 +90,7 @@ impl Buster {
     /// If MIME types are uncommon, then use this funtion
     /// as it won't panic when a weird MIM is encountered.
     ///
-    /// Otherwise, use [process]
+    /// Otherwise, use [process][Self::process]
     ///
     /// Note: it omits processing uncommon MIME types
     pub fn try_process(&self) -> Result<Files, Error> {
