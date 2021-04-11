@@ -17,5 +17,5 @@ fn main() {
         .build()
         .unwrap();
 
-    config.process().unwrap().to_env();
+    config.process().unwrap();
 }

@@ -38,14 +38,16 @@
 //! There's a runtime component to this library which will let you read modified
 //! filenames from within your program. See [Files]
 
+use std::collections::HashMap;
 use std::io::Error;
 use std::path::Path;
 use std::{fs, path::PathBuf};
 
 use derive_builder::Builder;
+use serde::{Deserialize, Serialize};
 use walkdir::WalkDir;
 
-use crate::Files;
+use crate::ENV_VAR_NAME;
 
 /// Configuration for setting up cache-busting
 #[derive(Debug, Clone, Builder)]
@@ -93,7 +95,7 @@ impl Buster {
     /// Otherwise, use [process][Self::process]
     ///
     /// Note: it omits processing uncommon MIME types
-    pub fn try_process(&self) -> Result<Files, Error> {
+    pub fn try_process(&self) -> Result<(), Error> {
         self.init()?;
         let mut file_map: Files = Files::new(&self.result);
         for entry in WalkDir::new(&self.source)
@@ -126,15 +128,15 @@ impl Buster {
                 }
             }
         }
-
-        Ok(file_map)
+        file_map.to_env();
+        Ok(())
     }
 
     /// Processes files.
     ///
     /// If MIME types are common, then use this funtion
     /// as it will panic when a weird MIM is encountered.
-    pub fn process(&self) -> Result<Files, Error> {
+    pub fn process(&self) -> Result<(), Error> {
         // panics when mimetypes are detected. This way you'll know which files are ignored
         // from processing
 
@@ -175,7 +177,8 @@ impl Buster {
             }
         }
 
-        Ok(file_map)
+        file_map.to_env();
+        Ok(())
     }
 
     // helper fn to read file to string
@@ -229,6 +232,61 @@ impl Buster {
     }
 }
 
+/// Filemap struct
+///
+/// maps original names to generated names
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+struct Files {
+    /// filemap<original-path, modified-path>
+    pub map: HashMap<String, String>,
+    base_dir: String,
+}
+
+impl Files {
+    /// Initialize map
+    fn new(base_dir: &str) -> Self {
+        Files {
+            map: HashMap::default(),
+            base_dir: base_dir.into(),
+        }
+    }
+
+    /// Create file map: map original path to modified paths
+    fn add(&mut self, k: String, v: String) -> Result<(), &'static str> {
+        if self.map.contains_key(&k) {
+            Err("key exists")
+        } else {
+            self.map.insert(k, v);
+            Ok(())
+        }
+    }
+
+    /// This crate uses compile-time environment variables to transfer
+    /// data to the main program. This funtction sets that variable
+    fn to_env(&self) {
+        println!(
+            "cargo:rustc-env={}={}",
+            ENV_VAR_NAME,
+            serde_json::to_string(&self).unwrap()
+        );
+
+        // needed for testing load()
+        // if the above statement fails(println), then something's broken
+        // with the rust compiler. So not really worried about that.
+        #[cfg(test)]
+        std::env::set_var(ENV_VAR_NAME, serde_json::to_string(&self).unwrap());
+    }
+
+    #[cfg(test)]
+    /// Load filemap in main program. Should be called from main program
+    fn load() -> Self {
+        let env = std::env::var(ENV_VAR_NAME)
+            .expect("unable to read env var, might be a bug in lib. Please report on GitHub");
+        let res: Files = serde_json::from_str(&env).unwrap();
+        res
+    }
+}
+
 #[cfg(test)]
 pub mod tests {
     use super::*;
@@ -251,7 +309,8 @@ pub mod tests {
             .build()
             .unwrap();
 
-        let mut files = config.process().unwrap();
+        config.process().unwrap();
+        let mut files = Files::load();
 
         for (k, v) in files.map.drain() {
             let src = Path::new(&k);
@@ -280,7 +339,8 @@ pub mod tests {
             .build()
             .unwrap();
 
-        let mut files = config.try_process().unwrap();
+        config.process().unwrap();
+        let mut files = Files::load();
 
         for (k, v) in files.map.drain() {
             let src = Path::new(&k);

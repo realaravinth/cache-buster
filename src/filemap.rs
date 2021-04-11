@@ -12,7 +12,7 @@
 //! use cache_buster::Files;
 //!
 //! fn main(){
-//!    let files = Files::load();
+//!    let files = Files::new();
 //! }
 //! ```
 
@@ -29,17 +29,17 @@ const ENV_VAR_NAME: &str = "CACHE_BUSTER_FILE_MAP";
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct Files {
     /// filemap<original-path, modified-path>
-    pub map: HashMap<String, String>,
+    map: HashMap<String, String>,
     base_dir: String,
 }
 
 impl Files {
-    /// Initialize map
-    pub fn new(base_dir: &str) -> Self {
-        Files {
-            map: HashMap::default(),
-            base_dir: base_dir.into(),
-        }
+    /// Load filemap in main program. Should be called from main program
+    pub fn new() -> Self {
+        let env = env::var(ENV_VAR_NAME)
+            .expect("unable to read env var, might be a bug in lib. Please report on GitHub");
+        let res: Files = serde_json::from_str(&env).unwrap();
+        res
     }
 
     /// Get relative file path
@@ -60,40 +60,6 @@ impl Files {
     /// output `/prod/test.randomhash.svg`. For relative path, see [get][Self::get].
     pub fn get_full_path<'a>(&'a self, path: &'a str) -> Option<&'a String> {
         self.map.get(path)
-    }
-
-    /// Create file map: map original path to modified paths
-    pub fn add(&mut self, k: String, v: String) -> Result<(), &'static str> {
-        if self.map.contains_key(&k) {
-            Err("key exists")
-        } else {
-            self.map.insert(k, v);
-            Ok(())
-        }
-    }
-
-    /// This crate uses compile-time environment variables to transfer
-    /// data to the main program. This funtction sets that variable
-    pub fn to_env(&self) {
-        println!(
-            "cargo:rustc-env={}={}",
-            ENV_VAR_NAME,
-            serde_json::to_string(&self).unwrap()
-        );
-
-        // needed for testing load()
-        // if the above statement fails(println), then something's broken
-        // with the rust compiler. So not really worried about that.
-        #[cfg(test)]
-        env::set_var(ENV_VAR_NAME, serde_json::to_string(&self).unwrap());
-    }
-
-    /// Load filemap in main program. Should be called from main program
-    pub fn load() -> Self {
-        let env = env::var(ENV_VAR_NAME)
-            .expect("unable to read env var, might be a bug in lib. Please report on GitHub");
-        let res: Files = serde_json::from_str(&env).unwrap();
-        res
     }
 }
 
@@ -123,8 +89,9 @@ mod tests {
             .build()
             .unwrap();
 
-        let files = config.process().unwrap();
+        config.process().unwrap();
 
+        let files = Files::new();
         assert!(get_full_path_runner("./dist/log-out.svg", &files));
         assert!(get_full_path_runner(
             "./dist/a/b/c/d/s/d/svg/credit-card.svg",
@@ -148,35 +115,6 @@ mod tests {
     }
 
     #[test]
-    fn load_works() {
-        let types = vec![
-            mime::IMAGE_PNG,
-            mime::IMAGE_SVG,
-            mime::IMAGE_JPEG,
-            mime::IMAGE_GIF,
-        ];
-
-        let config = BusterBuilder::default()
-            .source("./dist")
-            .result("/tmp/prod3")
-            .mime_types(types)
-            .copy(true)
-            .follow_links(true)
-            .build()
-            .unwrap();
-
-        let files = config.process().unwrap();
-
-        files.to_env();
-
-        let x = Files::load();
-
-        assert_eq!(files, x);
-
-        cleanup(&config);
-    }
-
-    #[test]
     fn get_works() {
         let types = vec![
             mime::IMAGE_PNG,
@@ -194,7 +132,9 @@ mod tests {
             .build()
             .unwrap();
 
-        let files = config.process().unwrap();
+        config.process().unwrap();
+
+        let files = Files::new();
 
         assert!(get_runner("./dist/log-out.svg", &files));
         assert!(get_runner("./dist/a/b/c/d/s/d/svg/credit-card.svg", &files));

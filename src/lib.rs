@@ -35,3 +35,6 @@ pub mod processor;
 pub use processor::BusterBuilder;
 pub mod filemap;
 pub use filemap::Files;
+
+/// env var to which filemap is written during compilation
+pub const ENV_VAR_NAME: &str = "CACHE_BUSTER_FILE_MAP";
