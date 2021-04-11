@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["filemap","Module describing runtime compoenet for fetching modified filenames"],["processor","Module describing file processor that changes filenames to setup cache-busting"]]});
+initSidebarItems({"constant":[["ENV_VAR_NAME","env var to which filemap is written during compilation"]],"mod":[["filemap","Module describing runtime compoenet for fetching modified filenames"],["processor","Module describing file processor that changes filenames to setup cache-busting"]]});
