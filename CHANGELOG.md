@@ -1,5 +1,8 @@
 ## 0.1.1
 
+### Added:
+- Optional route prefix to `Processor`
+
 ### Changed:
 - `Files::load()` became `Files::new()`
 

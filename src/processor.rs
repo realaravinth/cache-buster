@@ -60,6 +60,9 @@ pub struct Buster {
     /// directory for writing results
     #[builder(setter(into))]
     result: String,
+    #[builder(setter(into, strip_option), default)]
+    /// route prefixes
+    prefix: Option<String>,
     /// copy other non-hashed files from source dire to result dir?
     copy: bool,
     /// follow symlinks?
@@ -74,6 +77,7 @@ impl Buster {
             fs::remove_dir_all(&self.result).unwrap();
         }
 
+        println!("{}", &self.result);
         fs::create_dir(&self.result).unwrap();
         self.create_dir_structure(Path::new(&self.source))?;
         Ok(())
@@ -195,8 +199,22 @@ impl Buster {
     // helper fn to generate filemap
     fn gen_map<'a>(&self, source: &'a Path, name: &str) -> (&'a Path, PathBuf) {
         let rel_location = source.strip_prefix(&self.source).unwrap().parent().unwrap();
-        let destination = Path::new(&self.result).join(rel_location).join(name);
-        (source, destination)
+        if let Some(prefix) = &self.prefix {
+            //panic!("{}", &prefix);
+            let mut result = self.result.as_str();
+            if result.chars().nth(0) == Some('/') {
+                result = &self.result[1..];
+            }
+            let destination = Path::new(prefix)
+                .join(&self.result[1..])
+                .join(rel_location)
+                .join(name);
+
+            (source, destination.into())
+        } else {
+            let destination = Path::new(&self.result).join(rel_location).join(name);
+            (source, destination.into())
+        }
     }
 
     // helper fn to copy files
@@ -231,7 +249,6 @@ impl Buster {
         Ok(())
     }
 }
-
 /// Filemap struct
 ///
 /// maps original names to generated names
@@ -318,6 +335,7 @@ pub mod tests {
 
             assert_eq!(src.exists(), dest.exists());
         }
+
         cleanup(&config);
     }
 
@@ -354,5 +372,39 @@ pub mod tests {
 
     pub fn cleanup(config: &Buster) {
         let _ = fs::remove_dir_all(&config.result);
+    }
+    #[test]
+    fn prefix_works() {
+        let types = vec![
+            mime::IMAGE_PNG,
+            mime::IMAGE_SVG,
+            mime::IMAGE_JPEG,
+            mime::IMAGE_GIF,
+        ];
+
+        let config = BusterBuilder::default()
+            .source("./dist")
+            .result("/tmp/prod2i")
+            .mime_types(types)
+            .copy(true)
+            .follow_links(true)
+            .prefix("/test")
+            .build()
+            .unwrap();
+
+        config.process().unwrap();
+        let mut files = Files::load();
+
+        if let Some(prefix) = &config.prefix {
+            for (k, v) in files.map.drain() {
+                let src = Path::new(&k);
+                println!("{}", &v);
+                let dest = Path::new(&v[prefix.len()..]);
+
+                assert_eq!(src.exists(), dest.exists());
+            }
+        }
+
+        cleanup(&config);
     }
 }

@@ -17,6 +17,7 @@
 - [x] `SHA-256` based name generation during compile-time
 - [x] Processes files based on provided MIME filters
 - [x] Exposes modified names to program during runtime
+- [x] Route prefixes(optional)
 
 ## Usage:
 
