@@ -9,6 +9,10 @@
   `CACHE_BUSTER_DATA_FILE`(`./src/cache_buster_data.json`) and the user
   is requested to read and pass the value to `File::new()`
 
+### Fixed:
+
+- `Files::get()` now behaves as it is described in the documentation
+
 ## 0.1.1
 
 ### Added:

@@ -44,8 +44,8 @@ impl Files {
     /// output `/test.randomhash.svg`. For full path, see [get_full_path][Self::get_full_path].
     pub fn get<'a>(&'a self, path: &'a str) -> Option<&'a str> {
         if let Some(path) = self.map.get(path) {
-            //Some(&path[self.base_dir.len()..])
-            Some(&path)
+            Some(&path[self.base_dir.len()..])
+            // Some(&path)
         } else {
             None
         }
@@ -149,9 +149,9 @@ mod tests {
 
     fn get_runner(path: &str, files: &Files) -> bool {
         if let Some(file) = files.get(path) {
-            // let path = Path::new(&files.base_dir).join(&file[1..]);
-            println!("{}", &file);
-            let path = Path::new(&file);
+            let path = Path::new(&files.base_dir).join(&file[1..]);
+            //println!("{}", &file);
+            let path = Path::new(&path);
             path.exists()
         } else {
             false
