@@ -3,3 +3,4 @@ prod
 tarpaulin-report.html
 actix-example/target
 actix-example/prod
+prod56/

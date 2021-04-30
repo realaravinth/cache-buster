@@ -21,7 +21,7 @@ dependencies = [
 
 [[package]]
 name = "cache-buster"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "data-encoding",
  "derive_builder",

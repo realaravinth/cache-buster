@@ -1,6 +1,6 @@
 [package]
 name = "cache-buster"
-version = "0.1.1"
+version = "0.2.0"
 authors = ["realaravinth <realaravinth@batsense.net>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
@@ -22,7 +22,7 @@ mime = "0.3.16"
 
 sha2 = "0.9.3"
 
-derive_builder = "0.10.0"
+derive_builder = "0.10.2"
 
 data-encoding = "2.3.2"
 walkdir = "2"

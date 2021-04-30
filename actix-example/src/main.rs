@@ -1,7 +1,8 @@
 use cache_buster::Files;
+use cache_buster::CACHE_BUSTER_DATA_FILE;
 
 fn main() {
-    let files = Files::new();
+    let files = Files::new(CACHE_BUSTER_DATA_FILE);
 
     assert!(get_full_path_runner("../dist/log-out.svg", &files));
     assert!(get_full_path_runner(

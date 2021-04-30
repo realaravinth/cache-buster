@@ -47,7 +47,7 @@ use derive_builder::Builder;
 use serde::{Deserialize, Serialize};
 use walkdir::WalkDir;
 
-use crate::ENV_VAR_NAME;
+use crate::*;
 
 /// Configuration for setting up cache-busting
 #[derive(Debug, Clone, Builder)]
@@ -77,7 +77,6 @@ impl Buster {
             fs::remove_dir_all(&self.result).unwrap();
         }
 
-        println!("{}", &self.result);
         fs::create_dir(&self.result).unwrap();
         self.create_dir_structure(Path::new(&self.source))?;
         Ok(())
@@ -93,53 +92,7 @@ impl Buster {
 
     /// Processes files.
     ///
-    /// If MIME types are uncommon, then use this funtion
-    /// as it won't panic when a weird MIM is encountered.
-    ///
-    /// Otherwise, use [process][Self::process]
-    ///
-    /// Note: it omits processing uncommon MIME types
-    pub fn try_process(&self) -> Result<(), Error> {
-        self.init()?;
-        let mut file_map: Files = Files::new(&self.result);
-        for entry in WalkDir::new(&self.source)
-            .follow_links(self.follow_links)
-            .into_iter()
-        {
-            let entry = entry?;
-            let path = entry.path();
-            let path = Path::new(&path);
-
-            for mime_type in self.mime_types.iter() {
-                if let Some(file_mime) = mime_guess::from_path(path).first() {
-                    if &file_mime == mime_type {
-                        let contents = Self::read_to_string(&path).unwrap();
-                        let hash = Self::hasher(&contents);
-                        let new_name = format!(
-                            "{}.{}.{}",
-                            path.file_stem().unwrap().to_str().unwrap(),
-                            hash,
-                            path.extension().unwrap().to_str().unwrap()
-                        );
-                        self.copy(path, &new_name);
-
-                        let (source, destination) = self.gen_map(path, &&new_name);
-                        let _ = file_map.add(
-                            source.to_str().unwrap().into(),
-                            destination.to_str().unwrap().into(),
-                        );
-                    }
-                }
-            }
-        }
-        file_map.to_env();
-        Ok(())
-    }
-
-    /// Processes files.
-    ///
-    /// If MIME types are common, then use this funtion
-    /// as it will panic when a weird MIM is encountered.
+    /// Panics when a weird MIME is encountered.
     pub fn process(&self) -> Result<(), Error> {
         // panics when mimetypes are detected. This way you'll know which files are ignored
         // from processing
@@ -206,7 +159,7 @@ impl Buster {
                 result = &self.result[1..];
             }
             let destination = Path::new(prefix)
-                .join(&self.result[1..])
+                .join(&result)
                 .join(rel_location)
                 .join(name);
 
@@ -281,25 +234,33 @@ impl Files {
     /// This crate uses compile-time environment variables to transfer
     /// data to the main program. This funtction sets that variable
     fn to_env(&self) {
-        println!(
-            "cargo:rustc-env={}={}",
-            ENV_VAR_NAME,
-            serde_json::to_string(&self).unwrap()
-        );
+        let json = serde_json::to_string(&self).unwrap();
+        //        println!("cargo:rustc-env={}={}", ENV_VAR_NAME, json);
+        let res = Path::new(CACHE_BUSTER_DATA_FILE);
+        if res.exists() {
+            fs::remove_file(&res).unwrap();
+        }
+
+        //       const PREFIX: &str = r##"pub const FILE_MAP: &str = r#" "##;
+        //       const POSTFIX: &str = r##""#;"##;
+
+        //       let content = format!("#[allow(dead_code)]\n{}{}{}", &PREFIX, &json, &POSTFIX);
+
+        //        fs::write(CACHE_BUSTER_DATA_FILE, content).unwrap();
+        fs::write(CACHE_BUSTER_DATA_FILE, &json).unwrap();
 
         // needed for testing load()
         // if the above statement fails(println), then something's broken
         // with the rust compiler. So not really worried about that.
-        #[cfg(test)]
-        std::env::set_var(ENV_VAR_NAME, serde_json::to_string(&self).unwrap());
+        //        #[cfg(test)]
+        //        std::env::set_var(ENV_VAR_NAME, serde_json::to_string(&self).unwrap());
     }
 
     #[cfg(test)]
     /// Load filemap in main program. Should be called from main program
     fn load() -> Self {
-        let env = std::env::var(ENV_VAR_NAME)
-            .expect("unable to read env var, might be a bug in lib. Please report on GitHub");
-        let res: Files = serde_json::from_str(&env).unwrap();
+        let map = fs::read_to_string(CACHE_BUSTER_DATA_FILE).unwrap();
+        let res: Files = serde_json::from_str(&map).unwrap();
         res
     }
 }
@@ -308,8 +269,8 @@ impl Files {
 pub mod tests {
     use super::*;
 
-    #[test]
     fn hasher_works() {
+        delete_file();
         let types = vec![
             mime::IMAGE_PNG,
             mime::IMAGE_SVG,
@@ -339,42 +300,17 @@ pub mod tests {
         cleanup(&config);
     }
 
-    #[test]
-    fn try_process_works() {
-        let types = vec![
-            mime::IMAGE_PNG,
-            mime::IMAGE_SVG,
-            mime::IMAGE_JPEG,
-            mime::IMAGE_GIF,
-        ];
-
-        let config = BusterBuilder::default()
-            .source("./dist")
-            .result("/tmp/prod")
-            .mime_types(types)
-            .copy(true)
-            .follow_links(true)
-            .build()
-            .unwrap();
-
-        config.process().unwrap();
-        let mut files = Files::load();
-
-        for (k, v) in files.map.drain() {
-            let src = Path::new(&k);
-            let dest = Path::new(&v);
-
-            assert_eq!(src.exists(), dest.exists());
-        }
-
-        cleanup(&config);
-    }
-
     pub fn cleanup(config: &Buster) {
         let _ = fs::remove_dir_all(&config.result);
+        delete_file();
     }
-    #[test]
+
+    pub fn delete_file() {
+        let _ = fs::remove_file(&CACHE_BUSTER_DATA_FILE);
+    }
+
     fn prefix_works() {
+        delete_file();
         let types = vec![
             mime::IMAGE_PNG,
             mime::IMAGE_SVG,
@@ -398,7 +334,6 @@ pub mod tests {
         if let Some(prefix) = &config.prefix {
             for (k, v) in files.map.drain() {
                 let src = Path::new(&k);
-                println!("{}", &v);
                 let dest = Path::new(&v[prefix.len()..]);
 
                 assert_eq!(src.exists(), dest.exists());
@@ -406,5 +341,10 @@ pub mod tests {
         }
 
         cleanup(&config);
+    }
+
+    pub fn runner() {
+        prefix_works();
+        hasher_works();
     }
 }

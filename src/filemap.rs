@@ -10,18 +10,16 @@
 //!
 //! ```no_run
 //! use cache_buster::Files;
+//! use cache_buster::CACHE_BUSTER_DATA_FILE;
 //!
 //! fn main(){
-//!    let files = Files::new();
+//!    let files = Files::new(CACHE_BUSTER_DATA_FILE);
 //! }
 //! ```
 
 use std::collections::HashMap;
-use std::env;
 
 use serde::{Deserialize, Serialize};
-
-const ENV_VAR_NAME: &str = "CACHE_BUSTER_FILE_MAP";
 
 /// Filemap struct
 ///
@@ -35,10 +33,8 @@ pub struct Files {
 
 impl Files {
     /// Load filemap in main program. Should be called from main program
-    pub fn new() -> Self {
-        let env = env::var(ENV_VAR_NAME)
-            .expect("unable to read env var, might be a bug in lib. Please report on GitHub");
-        let res: Files = serde_json::from_str(&env).unwrap();
+    pub fn new(map: &str) -> Self {
+        let res: Files = serde_json::from_str(&map).unwrap();
         res
     }
 
@@ -48,7 +44,8 @@ impl Files {
     /// output `/test.randomhash.svg`. For full path, see [get_full_path][Self::get_full_path].
     pub fn get<'a>(&'a self, path: &'a str) -> Option<&'a str> {
         if let Some(path) = self.map.get(path) {
-            Some(&path[self.base_dir.len()..])
+            //Some(&path[self.base_dir.len()..])
+            Some(&path)
         } else {
             None
         }
@@ -65,14 +62,17 @@ impl Files {
 
 #[cfg(test)]
 mod tests {
-    use crate::processor::tests::cleanup;
+    use std::fs;
+
+    use crate::processor::tests::{cleanup, delete_file, runner as processor_runner};
     use crate::processor::*;
+    use crate::CACHE_BUSTER_DATA_FILE;
 
     use super::*;
     use std::path::Path;
 
-    #[test]
     fn get_full_path_works() {
+        delete_file();
         let types = vec![
             mime::IMAGE_PNG,
             mime::IMAGE_SVG,
@@ -82,7 +82,7 @@ mod tests {
 
         let config = BusterBuilder::default()
             .source("./dist")
-            .result("/tmp/prod2")
+            .result("/tmp/prodsd2")
             .mime_types(types)
             .copy(true)
             .follow_links(true)
@@ -91,7 +91,9 @@ mod tests {
 
         config.process().unwrap();
 
-        let files = Files::new();
+        let map = fs::read_to_string(CACHE_BUSTER_DATA_FILE).unwrap();
+        let files = Files::new(&map);
+
         assert!(get_full_path_runner("./dist/log-out.svg", &files));
         assert!(get_full_path_runner(
             "./dist/a/b/c/d/s/d/svg/credit-card.svg",
@@ -114,8 +116,8 @@ mod tests {
         }
     }
 
-    #[test]
     fn get_works() {
+        delete_file();
         let types = vec![
             mime::IMAGE_PNG,
             mime::IMAGE_SVG,
@@ -134,7 +136,8 @@ mod tests {
 
         config.process().unwrap();
 
-        let files = Files::new();
+        let map = fs::read_to_string(CACHE_BUSTER_DATA_FILE).unwrap();
+        let files = Files::new(&map);
 
         assert!(get_runner("./dist/log-out.svg", &files));
         assert!(get_runner("./dist/a/b/c/d/s/d/svg/credit-card.svg", &files));
@@ -146,10 +149,19 @@ mod tests {
 
     fn get_runner(path: &str, files: &Files) -> bool {
         if let Some(file) = files.get(path) {
-            let path = Path::new(&files.base_dir).join(&file[1..]);
+            // let path = Path::new(&files.base_dir).join(&file[1..]);
+            println!("{}", &file);
+            let path = Path::new(&file);
             path.exists()
         } else {
             false
         }
+    }
+
+    #[test]
+    pub fn runner() {
+        get_works();
+        get_full_path_works();
+        processor_runner();
     }
 }
