@@ -24,7 +24,7 @@
 Add this to your `Cargo.toml`:
 
 ```toml
-cache-buster = { version = "0.1", git = "https://github.com/realaravinth/cache-buster" }
+cache-buster = { version = "0.2", git = "https://github.com/realaravinth/cache-buster" }
 ```
 
 ## Examples:
