@@ -29,6 +29,7 @@
 <span id="26">26</span>
 <span id="27">27</span>
 <span id="28">28</span>
+<span id="29">29</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="ident">cache_buster</span>::<span class="ident">Files</span>;
 <span class="kw">use</span> <span class="ident">cache_buster</span>::<span class="ident">CACHE_BUSTER_DATA_FILE</span>;
@@ -53,6 +54,7 @@
     <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">path</span>::<span class="ident">Path</span>;
 
     <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">file</span>) <span class="op">=</span> <span class="ident">files</span>.<span class="ident">get_full_path</span>(<span class="ident">path</span>) {
+        <span class="macro">println</span><span class="macro">!</span>(<span class="string">&quot;{:?}&quot;</span>, <span class="ident">files</span>.<span class="ident">get</span>(<span class="ident">path</span>));
         <span class="ident">Path</span>::<span class="ident">new</span>(<span class="ident">file</span>).<span class="ident">exists</span>()
     } <span class="kw">else</span> {
         <span class="bool-val">false</span>
