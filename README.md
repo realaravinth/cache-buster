@@ -1,7 +1,8 @@
 <div align="center">
   <h1>Cache Buster</h1>
   <p>
-    <strong>cache-buster - A library that aids in staticfile cache busting with SHA-258 hashes</strong>
+	<strong>cache-buster - A library that aids in static file cache
+	busting with SHA-256 hashes</strong>
   </p>
 
 [![Documentation](https://img.shields.io/badge/docs-master-blue)](https://realaravinth.github.io/cache-buster/cache_buster/index.html)
@@ -11,6 +12,22 @@
 [![codecov](https://codecov.io/gh/realaravinth/cache-buster/branch/master/graph/badge.svg)](https://codecov.io/gh/realaravinth/cache-buster)
 
 </div>
+
+## What is cache busting?
+
+To optimise network load time, browsers cache static files. Caching
+greatly improves performance but how do you inform browsers to
+invalidate cache when your files have changed? 
+
+Cache busting is a simple but effective solution for this issue. There
+are several ways to achieve this but the way this library does this is
+by changing file names to include the hash of the files' contents.
+
+So if you have `bundle.js`, it will become
+`bundle.<long-sha256-hash>.js`. This lets you set a super long cache age
+as, because of the file names changing, the path to the filename, too,
+will change. So as far as the browser is concerned, you are trying to load
+a file that it doesn't have. Pretty neat, isn't it?
 
 ## Features
 

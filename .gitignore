@@ -4,3 +4,5 @@ tarpaulin-report.html
 actix-example/target
 actix-example/prod
 prod56/
+src/cache_buster_data.json
+actix-example/src/cache_buster_data.json
