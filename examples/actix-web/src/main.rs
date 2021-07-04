@@ -11,9 +11,12 @@ use rust_embed::RustEmbed;
 use cache_buster::Files;
 
 mod index;
+
+/// 1. Set a riddicolusly high cache age
 pub const CACHE_AGE: u32 = 60 * 60 * 24 * 365;
 
 lazy_static! {
+    /// 2. create filemap
     pub static ref FILES: Files = {
         let map = include_str!("./cache_buster_data.json");
         Files::new(&map)
@@ -26,12 +29,6 @@ async fn main() -> std::io::Result<()> {
     std::env::set_var("RUST_LOG", "info");
 
     let ip = "localhost:2080";
-    crate::FILES
-        .get_full_path("./static/cachable/img/Spock_vulcan-salute.png")
-        .expect("unable to find Spock Vulcan salute image");
-    crate::FILES
-        .get("./static/cachable/css/main.css")
-        .expect("unable to find CSS");
 
     pretty_env_logger::init();
 
@@ -48,6 +45,7 @@ async fn main() -> std::io::Result<()> {
     Ok(())
 }
 
+/// 3. Embed files. Or not. You can also read files dynamically
 #[derive(RustEmbed)]
 #[folder = "dist/"]
 struct Asset;
@@ -61,6 +59,7 @@ fn handle_assets(path: &str) -> HttpResponse {
             };
 
             HttpResponse::Ok()
+                // 3. Set proper cache-control headers with cache age set from step 1
                 .insert_header(header::CacheControl(vec![
                     header::CacheDirective::Public,
                     header::CacheDirective::Extension("immutable".into(), None),

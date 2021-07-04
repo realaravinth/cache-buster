@@ -9,7 +9,7 @@ width="250px"
   Cache Buster
 </h1>
 <p>
-  <strong>May your cache long live and prosper!</strong>
+  <strong>May your cache live long and prosper!</strong>
 </p>
 
 [![Documentation](https://img.shields.io/badge/docs-master-blue)](https://realaravinth.github.io/cache-buster/cache_buster/index.html)
