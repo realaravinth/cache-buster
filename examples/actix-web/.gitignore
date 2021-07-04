@@ -1,4 +1,5 @@
 /target
 prod
 dist
+src/cache_buster_data.json
 tarpaulin-report.html
