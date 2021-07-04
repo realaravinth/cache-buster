@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CACHE_AGE",""]],"fn":[["handle_assets",""],["handle_favicons",""],["main",""],["services",""]],"mod":[["index",""]],"struct":[["Asset",""],["FILES",""],["Favicons",""],["INDEX",""],["favicons",""],["serve_index",""],["static_files",""]]});

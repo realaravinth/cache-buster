@@ -1,1 +1,1 @@
-window.ALL_CRATES = ["actix_example","cache_buster"];
+window.ALL_CRATES = ["actix_web","cache_buster"];

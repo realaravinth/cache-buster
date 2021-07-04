@@ -1,3 +1,3 @@
 (function() {var implementors = {};
-implementors["cache_buster"] = [{"text":"impl <a class=\"trait\" href=\"https://docs.rs/serde/1.0.125/serde/ser/trait.Serialize.html\" title=\"trait serde::ser::Serialize\">Serialize</a> for <a class=\"struct\" href=\"cache_buster/filemap/struct.Files.html\" title=\"struct cache_buster::filemap::Files\">Files</a>","synthetic":false,"types":["cache_buster::filemap::Files"]}];
+implementors["cache_buster"] = [{"text":"impl <a class=\"trait\" href=\"https://docs.rs/serde/1.0.126/serde/ser/trait.Serialize.html\" title=\"trait serde::ser::Serialize\">Serialize</a> for <a class=\"struct\" href=\"cache_buster/filemap/struct.Files.html\" title=\"struct cache_buster::filemap::Files\">Files</a>","synthetic":false,"types":["cache_buster::filemap::Files"]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
