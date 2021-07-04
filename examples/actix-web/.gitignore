@@ -1,3 +1,4 @@
 /target
 prod
+dist
 tarpaulin-report.html
