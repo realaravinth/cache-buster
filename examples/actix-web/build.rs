@@ -6,11 +6,12 @@ fn main() {
         mime::IMAGE_SVG,
         mime::IMAGE_JPEG,
         mime::IMAGE_GIF,
+        mime::TEXT_CSS,
     ];
 
     let config = BusterBuilder::default()
-        .source("../dist")
-        .result("./prod")
+        .source("./static/cachable/")
+        .result("./dist")
         .mime_types(types)
         .copy(true)
         .follow_links(true)

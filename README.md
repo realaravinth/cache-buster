@@ -1,9 +1,16 @@
 <div align="center">
-  <h1>Cache Buster</h1>
-  <p>
-	<strong>cache-buster - A library that aids in static file cache
-	busting with SHA-256 hashes</strong>
-  </p>
+<img
+width="250px"
+  class="greetings"
+  src="./examples/actix-web/static/cachable/img/Spock_vulcan-salute.png"
+  alt="logo image"
+/>
+<h1>
+  Cache Buster
+</h1>
+<p>
+  <strong>May your cache long live and prosper!</strong>
+</p>
 
 [![Documentation](https://img.shields.io/badge/docs-master-blue)](https://realaravinth.github.io/cache-buster/cache_buster/index.html)
 ![CI (Linux)](<https://github.com/realaravinth/cache-buster/workflows/CI%20(Linux)/badge.svg>)
@@ -17,7 +24,7 @@
 
 To optimise network load time, browsers cache static files. Caching
 greatly improves performance but how do you inform browsers to
-invalidate cache when your files have changed? 
+invalidate cache when your files have changed?
 
 Cache busting is a simple but effective solution for this issue. There
 are several ways to achieve this but the way this library does this is
@@ -46,6 +53,6 @@ cache-buster = { version = "0.2", git = "https://github.com/realaravinth/cache-b
 
 ## Examples:
 
-- See [acix-example](./actix-example)
+- See [acix-example](./examples/actix-web)
 - See [mCaptcha/guard](https://github.com/mCaptcha/guard) for use
   with [Sailfish](https://crates.io/crates/sailfish) template engine.

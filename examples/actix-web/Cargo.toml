@@ -1,5 +1,5 @@
 [package]
-name = "actix-example"
+name = "actix-web"
 version = "0.1.0"
 authors = ["realaravinth <realaravinth@batsense.net>"]
 edition = "2018"
@@ -8,8 +8,18 @@ build = "build.rs"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-cache-buster = { path = "../"}
+cache-buster = { path = "../../"}
+actix-web = "4.0.0-beta.8"
+rust-embed = "5.9.0"
+lazy_static = "1.4"
+mime = "0.3.16"
+pretty_env_logger = "0.4"
+log = "0.4"
+mime_guess = "2.0.3"
 
 [build-dependencies]
-cache-buster = { path = "../"}
+cache-buster = { path = "../../"}
 mime = "0.3.16"
+
+[dev-dependencies]
+actix-rt = "2"
