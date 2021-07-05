@@ -27,27 +27,25 @@
 //! ```no_run
 //! use cache_buster::BusterBuilder;
 //!
-//! fn main() {
-//!     // note: add error checking yourself.
-//!     //    println!("cargo:rustc-env=GIT_process={}", git_process);
-//!     let types = vec![
-//!         mime::IMAGE_PNG,
-//!         mime::IMAGE_SVG,
-//!         mime::IMAGE_JPEG,
-//!         mime::IMAGE_GIF,
-//!     ];
+//! // note: add error checking yourself.
+//! //    println!("cargo:rustc-env=GIT_process={}", git_process);
+//! let types = vec![
+//!     mime::IMAGE_PNG,
+//!     mime::IMAGE_SVG,
+//!     mime::IMAGE_JPEG,
+//!     mime::IMAGE_GIF,
+//! ];
 //!
-//!     let config = BusterBuilder::default()
-//!         .source("./dist")
-//!         .result("./prod")
-//!         .mime_types(types)
-//!         .copy(true)
-//!         .follow_links(true)
-//!         .build()
-//!         .unwrap();
+//! let config = BusterBuilder::default()
+//!     .source("./dist")
+//!     .result("./prod")
+//!     .mime_types(types)
+//!     .copy(true)
+//!     .follow_links(true)
+//!     .build()
+//!     .unwrap();
 //!
-//!     config.process().unwrap();
-//! }
+//! config.process().unwrap();
 //! ```
 //! - `main.rs`:
 //!
@@ -59,11 +57,9 @@
 //! use cache_buster::Files;
 //! use cache_buster::CACHE_BUSTER_DATA_FILE;
 //!
-//! fn main(){
-//!    let files = Files::new(CACHE_BUSTER_DATA_FILE);
-//!    // the path to the file before setting up for cache busting
-//!    files.get("./dist/github.svg");
-//! }
+//! let files = Files::new(CACHE_BUSTER_DATA_FILE);
+//! // the path to the file before setting up for cache busting
+//! files.get("./dist/github.svg");
 //! ```
 
 pub mod processor;

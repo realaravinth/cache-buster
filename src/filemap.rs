@@ -12,9 +12,7 @@
 //! use cache_buster::Files;
 //! use cache_buster::CACHE_BUSTER_DATA_FILE;
 //!
-//! fn main(){
-//!    let files = Files::new(CACHE_BUSTER_DATA_FILE);
-//! }
+//! let files = Files::new(CACHE_BUSTER_DATA_FILE);
 //! ```
 
 use std::collections::HashMap;

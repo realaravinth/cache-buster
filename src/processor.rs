@@ -12,27 +12,25 @@
 //! ```rust
 //! use cache_buster::BusterBuilder;
 //!
-//! fn main() {
-//!     // note: add error checking yourself.
-//!     //    println!("cargo:rustc-env=GIT_process={}", git_process);
-//!     let types = vec![
-//!         mime::IMAGE_PNG,
-//!         mime::IMAGE_SVG,
-//!         mime::IMAGE_JPEG,
-//!         mime::IMAGE_GIF,
-//!     ];
+//! // note: add error checking yourself.
+//! //    println!("cargo:rustc-env=GIT_process={}", git_process);
+//! let types = vec![
+//!     mime::IMAGE_PNG,
+//!     mime::IMAGE_SVG,
+//!     mime::IMAGE_JPEG,
+//!     mime::IMAGE_GIF,
+//! ];
 //!
-//!     let config = BusterBuilder::default()
-//!         .source("./dist")
-//!         .result("./prod")
-//!         .mime_types(types)
-//!         .copy(true)
-//!         .follow_links(true)
-//!         .build()
-//!         .unwrap();
+//! let config = BusterBuilder::default()
+//!     .source("./dist")
+//!     .result("./prod")
+//!     .mime_types(types)
+//!     .copy(true)
+//!     .follow_links(true)
+//!     .build()
+//!     .unwrap();
 //!
-//!     config.process().unwrap();
-//! }
+//! config.process().unwrap();
 //! ```
 //!
 //! There's a runtime component to this library which will let you read modified
@@ -135,7 +133,7 @@ impl<'a> Buster<'a> {
                 for mime_type in self.mime_types.iter() {
                     let file_mime = mime_guess::from_path(path)
                         .first()
-                        .expect(&format!("couldn't resolve MIME for file: {:?}", &path));
+                        .unwrap_or_else(|| panic!("couldn't resolve MIME for file: {:?}", &path));
                     if &file_mime == mime_type {
                         let contents = Self::read_to_string(&path).unwrap();
                         let hash = Self::hasher(&contents);
@@ -177,7 +175,7 @@ impl<'a> Buster<'a> {
         if let Some(prefix) = &self.prefix {
             //panic!("{}", &prefix);
             let mut result = self.result.as_str();
-            if result.chars().nth(0) == Some('/') {
+            if result.starts_with('/') {
                 result = &self.result[1..];
             }
             let destination = Path::new(prefix)
@@ -185,10 +183,10 @@ impl<'a> Buster<'a> {
                 .join(rel_location)
                 .join(name);
 
-            (source, destination.into())
+            (source, destination)
         } else {
             let destination = Path::new(&self.result).join(rel_location).join(name);
-            (source, destination.into())
+            (source, destination)
         }
     }
 
@@ -211,13 +209,11 @@ impl<'a> Buster<'a> {
 
             if entry_path.is_dir() && path != entry_path {
                 Self::create_dir_structure(&self, entry_path)?;
-            } else {
-                if entry_path.is_dir() {
-                    let rel_location = entry_path.strip_prefix(&self.source).unwrap();
-                    let destination = Path::new(&self.result).join(rel_location);
-                    if !destination.exists() {
-                        fs::create_dir(destination)?
-                    }
+            } else if entry_path.is_dir() {
+                let rel_location = entry_path.strip_prefix(&self.source).unwrap();
+                let destination = Path::new(&self.result).join(rel_location);
+                if !destination.exists() {
+                    fs::create_dir(destination)?
                 }
             }
         }
@@ -245,11 +241,11 @@ impl Files {
 
     /// Create file map: map original path to modified paths
     fn add(&mut self, k: String, v: String) -> Result<(), &'static str> {
-        if self.map.contains_key(&k) {
-            Err("key exists")
-        } else {
-            self.map.insert(k, v);
+        if let std::collections::hash_map::Entry::Vacant(e) = self.map.entry(k) {
+            e.insert(v);
             Ok(())
+        } else {
+            Err("key exists")
         }
     }
 
