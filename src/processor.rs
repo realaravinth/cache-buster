@@ -295,38 +295,6 @@ impl Files {
 pub mod tests {
     use super::*;
 
-    #[test]
-    fn hasher_works() {
-        delete_file();
-        let types = vec![
-            mime::IMAGE_PNG,
-            mime::IMAGE_SVG,
-            mime::IMAGE_JPEG,
-            mime::IMAGE_GIF,
-        ];
-
-        let config = BusterBuilder::default()
-            .source("./dist")
-            .result("./prod56")
-            .mime_types(types)
-            .copy(true)
-            .follow_links(true)
-            .build()
-            .unwrap();
-
-        config.process().unwrap();
-        let mut files = Files::load();
-
-        for (k, v) in files.map.drain() {
-            let src = Path::new(&k);
-            let dest = Path::new(&v);
-
-            assert_eq!(src.exists(), dest.exists());
-        }
-
-        cleanup(&config);
-    }
-
     pub fn cleanup(config: &Buster) {
         let _ = fs::remove_dir_all(&config.result);
         delete_file();
@@ -334,57 +302,6 @@ pub mod tests {
 
     pub fn delete_file() {
         let _ = fs::remove_file(&CACHE_BUSTER_DATA_FILE);
-    }
-
-    //    #[test]
-    fn prefix_works() {
-        delete_file();
-        let types = vec![
-            mime::IMAGE_PNG,
-            mime::IMAGE_SVG,
-            mime::IMAGE_JPEG,
-            mime::IMAGE_GIF,
-        ];
-
-        let no_hash = vec!["bell.svg", "eye.svg", "a/b/c/d/s/d/svg/10.svg"];
-
-        let config = BusterBuilder::default()
-            .source("./dist")
-            .result("/tmp/prod2i2")
-            .mime_types(types)
-            .copy(true)
-            .follow_links(true)
-            .prefix("/test")
-            .no_hash(no_hash.clone())
-            .build()
-            .unwrap();
-
-        config.process().unwrap();
-        let mut files = Files::load();
-
-        if let Some(prefix) = &config.prefix {
-            no_hash.iter().for_each(|file| {
-                assert!(files.map.iter().any(|(k, v)| {
-                    let source = Path::new(k);
-                    let dest = Path::new(&v[prefix.len()..]);
-                    let no_hash = Path::new(file);
-                    let stat = source == &Path::new(&config.source).join(file)
-                        && dest.exists()
-                        && no_hash.file_name() == dest.file_name();
-                    println!("[{}] file: {}", stat, file);
-                    stat
-                }));
-            });
-
-            for (k, v) in files.map.drain() {
-                let src = Path::new(&k);
-                let dest = Path::new(&v[prefix.len()..]);
-
-                assert_eq!(src.exists(), dest.exists());
-            }
-        }
-
-        cleanup(&config);
     }
 
     #[test]
@@ -409,9 +326,16 @@ pub mod tests {
             .is_err())
     }
 
-    #[test]
     fn no_specific_mime() {
-        let no_hash = vec!["858fd6c482cc75111d54.module.wasm"];
+        delete_file();
+        use std::{thread, time};
+
+        let sleep = time::Duration::from_secs(4);
+
+        thread::sleep(sleep);
+
+        const WASM: &str = "858fd6c482cc75111d54.module.wasm";
+        let no_hash = vec![WASM, "bell.svg", "eye.svg", "a/b/c/d/s/d/svg/10.svg"];
         let config = BusterBuilder::default()
             .source("./dist")
             .result("/tmp/prod2ii")
@@ -423,21 +347,72 @@ pub mod tests {
         config.process().unwrap();
         let files = Files::load();
 
+        let no_hash_file = Path::new(&config.result).join(WASM);
         assert!(files.map.iter().any(|(k, v)| {
             let source = Path::new(&config.source).join(k);
             let dest = Path::new(&v);
-            let no_hash = Path::new(&config.result).join(no_hash.first().unwrap());
-            println!("destination: {:?}", dest);
-            dest.file_name() == no_hash.file_name()
+            dest.file_name() == no_hash_file.file_name()
                 && dest.exists()
                 && source.file_name() == dest.file_name()
         }));
+
+        no_hash.iter().for_each(|file| {
+            assert!(files.map.iter().any(|(k, v)| {
+                let source = Path::new(k);
+                let dest = Path::new(&v);
+                let no_hash = Path::new(file);
+                source == &Path::new(&config.source).join(file)
+                    && dest.exists()
+                    && no_hash.file_name() == dest.file_name()
+            }));
+        });
+
+        for (k, v) in files.map.iter() {
+            let src = Path::new(&k);
+            let dest = Path::new(&v);
+
+            assert_eq!(src.exists(), dest.exists());
+        }
+
+        cleanup(&config);
+    }
+
+    fn prefix_works() {
+        delete_file();
+        let types = vec![
+            mime::IMAGE_PNG,
+            mime::IMAGE_SVG,
+            mime::IMAGE_JPEG,
+            mime::IMAGE_GIF,
+        ];
+
+        let config = BusterBuilder::default()
+            .source("./dist")
+            .result("/tmp/prod2i")
+            .mime_types(types)
+            .copy(true)
+            .follow_links(true)
+            .prefix("/test")
+            .build()
+            .unwrap();
+
+        config.process().unwrap();
+        let mut files = Files::load();
+
+        if let Some(prefix) = &config.prefix {
+            for (k, v) in files.map.drain() {
+                let src = Path::new(&k);
+                let dest = Path::new(&v[prefix.len()..]);
+
+                assert_eq!(src.exists(), dest.exists());
+            }
+        }
 
         cleanup(&config);
     }
 
     pub fn runner() {
         prefix_works();
-        hasher_works();
+        no_specific_mime();
     }
 }
