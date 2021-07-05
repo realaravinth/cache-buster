@@ -73,10 +73,6 @@
 <span id="70">70</span>
 <span id="71">71</span>
 <span id="72">72</span>
-<span id="73">73</span>
-<span id="74">74</span>
-<span id="75">75</span>
-<span id="76">76</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">/*
 * Copyright (C) 2021  Aravinth Manivannan &lt;realaravinth@batsense.net&gt;
@@ -107,27 +103,25 @@
 <span class="doccomment">//! ```no_run</span>
 <span class="doccomment">//! use cache_buster::BusterBuilder;</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! fn main() {</span>
-<span class="doccomment">//!     // note: add error checking yourself.</span>
-<span class="doccomment">//!     //    println!(&quot;cargo:rustc-env=GIT_process={}&quot;, git_process);</span>
-<span class="doccomment">//!     let types = vec![</span>
-<span class="doccomment">//!         mime::IMAGE_PNG,</span>
-<span class="doccomment">//!         mime::IMAGE_SVG,</span>
-<span class="doccomment">//!         mime::IMAGE_JPEG,</span>
-<span class="doccomment">//!         mime::IMAGE_GIF,</span>
-<span class="doccomment">//!     ];</span>
+<span class="doccomment">//! // note: add error checking yourself.</span>
+<span class="doccomment">//! //    println!(&quot;cargo:rustc-env=GIT_process={}&quot;, git_process);</span>
+<span class="doccomment">//! let types = vec![</span>
+<span class="doccomment">//!     mime::IMAGE_PNG,</span>
+<span class="doccomment">//!     mime::IMAGE_SVG,</span>
+<span class="doccomment">//!     mime::IMAGE_JPEG,</span>
+<span class="doccomment">//!     mime::IMAGE_GIF,</span>
+<span class="doccomment">//! ];</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//!     let config = BusterBuilder::default()</span>
-<span class="doccomment">//!         .source(&quot;./dist&quot;)</span>
-<span class="doccomment">//!         .result(&quot;./prod&quot;)</span>
-<span class="doccomment">//!         .mime_types(types)</span>
-<span class="doccomment">//!         .copy(true)</span>
-<span class="doccomment">//!         .follow_links(true)</span>
-<span class="doccomment">//!         .build()</span>
-<span class="doccomment">//!         .unwrap();</span>
+<span class="doccomment">//! let config = BusterBuilder::default()</span>
+<span class="doccomment">//!     .source(&quot;./dist&quot;)</span>
+<span class="doccomment">//!     .result(&quot;./prod&quot;)</span>
+<span class="doccomment">//!     .mime_types(types)</span>
+<span class="doccomment">//!     .copy(true)</span>
+<span class="doccomment">//!     .follow_links(true)</span>
+<span class="doccomment">//!     .build()</span>
+<span class="doccomment">//!     .unwrap();</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//!     config.process().unwrap();</span>
-<span class="doccomment">//! }</span>
+<span class="doccomment">//! config.process().unwrap();</span>
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//! - `main.rs`:</span>
 <span class="doccomment">//!</span>
@@ -139,11 +133,9 @@
 <span class="doccomment">//! use cache_buster::Files;</span>
 <span class="doccomment">//! use cache_buster::CACHE_BUSTER_DATA_FILE;</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! fn main(){</span>
-<span class="doccomment">//!    let files = Files::new(CACHE_BUSTER_DATA_FILE);</span>
-<span class="doccomment">//!    // the path to the file before setting up for cache busting</span>
-<span class="doccomment">//!    files.get(&quot;./dist/github.svg&quot;);</span>
-<span class="doccomment">//! }</span>
+<span class="doccomment">//! let files = Files::new(CACHE_BUSTER_DATA_FILE);</span>
+<span class="doccomment">//! // the path to the file before setting up for cache busting</span>
+<span class="doccomment">//! files.get(&quot;./dist/github.svg&quot;);</span>
 <span class="doccomment">//! ```</span>
 
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">processor</span>;
