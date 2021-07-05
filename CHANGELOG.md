@@ -15,6 +15,10 @@
   `CACHE_BUSTER_DATA_FILE`(`./src/cache_buster_data.json`) and the user
   is requested to read and pass the value to `File::new()`
 
+- `Files.mime_types` now accepts an `Option<Vec<mime::Mime>>`. When it
+  is unset(i.e `None`), no mime based filtering is done and all files
+  inside source directory is considered for processing.
+
 ### Fixed:
 
 - `Files::get()` now behaves as it is described in the documentation

@@ -121,6 +121,34 @@ impl<'a> Buster<'a> {
         self.init()?;
         let mut file_map: Files = Files::new(&self.result);
 
+        let mut process_worker = |path: &Path| {
+            let contents = Self::read_to_string(&path).unwrap();
+            let hash = Self::hasher(&contents);
+            let new_name = if self.no_hash.iter().any(|no_hash| {
+                let no_hash = Path::new(&self.source).join(&no_hash);
+                no_hash == path
+            }) {
+                format!(
+                    "{}.{}",
+                    path.file_stem().unwrap().to_str().unwrap(),
+                    path.extension().unwrap().to_str().unwrap()
+                )
+            } else {
+                format!(
+                    "{}.{}.{}",
+                    path.file_stem().unwrap().to_str().unwrap(),
+                    hash,
+                    path.extension().unwrap().to_str().unwrap()
+                )
+            };
+            self.copy(path, &new_name);
+            let (source, destination) = self.gen_map(path, &&new_name);
+            let _ = file_map.add(
+                source.to_str().unwrap().into(),
+                destination.to_str().unwrap().into(),
+            );
+        };
+
         for entry in WalkDir::new(&self.source)
             .follow_links(self.follow_links)
             .into_iter()
@@ -130,34 +158,6 @@ impl<'a> Buster<'a> {
             let path = entry.path();
             if !path.is_dir() {
                 let path = Path::new(&path);
-
-                let mut process_worker = |path: &Path| {
-                    let contents = Self::read_to_string(&path).unwrap();
-                    let hash = Self::hasher(&contents);
-                    let new_name = if self.no_hash.iter().any(|no_hash| {
-                        let no_hash = Path::new(&self.source).join(&no_hash);
-                        no_hash == path
-                    }) {
-                        format!(
-                            "{}.{}",
-                            path.file_stem().unwrap().to_str().unwrap(),
-                            path.extension().unwrap().to_str().unwrap()
-                        )
-                    } else {
-                        format!(
-                            "{}.{}.{}",
-                            path.file_stem().unwrap().to_str().unwrap(),
-                            hash,
-                            path.extension().unwrap().to_str().unwrap()
-                        )
-                    };
-                    self.copy(path, &new_name);
-                    let (source, destination) = self.gen_map(path, &&new_name);
-                    let _ = file_map.add(
-                        source.to_str().unwrap().into(),
-                        destination.to_str().unwrap().into(),
-                    );
-                };
 
                 match self.mime_types.as_ref() {
                     Some(mime_types) => {
@@ -275,25 +275,11 @@ impl Files {
     /// data to the main program. This funtction sets that variable
     fn to_env(&self) {
         let json = serde_json::to_string(&self).unwrap();
-        //        println!("cargo:rustc-env={}={}", ENV_VAR_NAME, json);
         let res = Path::new(CACHE_BUSTER_DATA_FILE);
         if res.exists() {
             fs::remove_file(&res).unwrap();
         }
-
-        //       const PREFIX: &str = r##"pub const FILE_MAP: &str = r#" "##;
-        //       const POSTFIX: &str = r##""#;"##;
-
-        //       let content = format!("#[allow(dead_code)]\n{}{}{}", &PREFIX, &json, &POSTFIX);
-
-        //        fs::write(CACHE_BUSTER_DATA_FILE, content).unwrap();
         fs::write(CACHE_BUSTER_DATA_FILE, &json).unwrap();
-
-        // needed for testing load()
-        // if the above statement fails(println), then something's broken
-        // with the rust compiler. So not really worried about that.
-        //        #[cfg(test)]
-        //        std::env::set_var(ENV_VAR_NAME, serde_json::to_string(&self).unwrap());
     }
 
     #[cfg(test)]
@@ -309,6 +295,7 @@ impl Files {
 pub mod tests {
     use super::*;
 
+    #[test]
     fn hasher_works() {
         delete_file();
         let types = vec![
@@ -349,6 +336,7 @@ pub mod tests {
         let _ = fs::remove_file(&CACHE_BUSTER_DATA_FILE);
     }
 
+    //    #[test]
     fn prefix_works() {
         delete_file();
         let types = vec![
@@ -421,28 +409,32 @@ pub mod tests {
             .is_err())
     }
 
-    //    #[test]
-    //    fn no_specific_mime() {
-    //        let no_hash = vec!["858fd6c482cc75111d54.module.wasm"];
-    //        let config = BusterBuilder::default()
-    //            .source("./dist")
-    //            .result("/tmp/prod2ii")
-    //            .copy(true)
-    //            .follow_links(true)
-    //            .no_hash(no_hash.clone())
-    //            .prefix("/test")
-    //            .build()
-    //            .unwrap();
-    //        config.process().unwrap();
-    //        let files = Files::load();
-    //        files.map.iter().any(|(k, v)| {
-    //            let dest = Path::new(&v[prefix.len()..]);
-    //            let no_hash = Path::new(file);
-    //            k == file && dest.exists() && no_hash.file_name() == dest.file_name()
-    //        });
-    //
-    //        cleanup(&config);
-    //    }
+    #[test]
+    fn no_specific_mime() {
+        let no_hash = vec!["858fd6c482cc75111d54.module.wasm"];
+        let config = BusterBuilder::default()
+            .source("./dist")
+            .result("/tmp/prod2ii")
+            .copy(true)
+            .follow_links(true)
+            .no_hash(no_hash.clone())
+            .build()
+            .unwrap();
+        config.process().unwrap();
+        let files = Files::load();
+
+        assert!(files.map.iter().any(|(k, v)| {
+            let source = Path::new(&config.source).join(k);
+            let dest = Path::new(&v);
+            let no_hash = Path::new(&config.result).join(no_hash.first().unwrap());
+            println!("destination: {:?}", dest);
+            dest.file_name() == no_hash.file_name()
+                && dest.exists()
+                && source.file_name() == dest.file_name()
+        }));
+
+        cleanup(&config);
+    }
 
     pub fn runner() {
         prefix_works();
