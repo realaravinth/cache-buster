@@ -51,7 +51,8 @@ use crate::*;
 
 /// Configuration for setting up cache-busting
 #[derive(Debug, Clone, Builder)]
-pub struct Buster {
+#[builder(build_fn(validate = "Self::validate"))]
+pub struct Buster<'a> {
     /// source directory
     #[builder(setter(into))]
     source: String,
@@ -67,9 +68,30 @@ pub struct Buster {
     copy: bool,
     /// follow symlinks?
     follow_links: bool,
+    /// exclude these files for hashing.
+    /// They will be copied over without including a hash in the filename
+    /// Path should be relative to [self.source]
+    #[builder(default)]
+    no_hash: Vec<&'a str>,
 }
 
-impl Buster {
+impl<'a> BusterBuilder<'a> {
+    fn validate(&self) -> Result<(), String> {
+        for file in self.no_hash.iter() {
+            for file in file.iter() {
+                if !Path::new(&self.source.as_ref().unwrap())
+                    .join(file)
+                    .exists()
+                {
+                    return Err(format!("File {} doesn't exist", file));
+                }
+            }
+        }
+        Ok(())
+    }
+}
+
+impl<'a> Buster<'a> {
     // creates base_dir to output files to
     fn init(&self) -> Result<(), Error> {
         let res = Path::new(&self.result);
@@ -107,7 +129,7 @@ impl Buster {
             let entry = entry?;
 
             let path = entry.path();
-            if !path.is_dir() {
+            if !path.is_dir() && !self.no_hash.contains(&path.to_str().unwrap()) {
                 let path = Path::new(&path);
 
                 for mime_type in self.mime_types.iter() {
@@ -150,7 +172,7 @@ impl Buster {
     }
 
     // helper fn to generate filemap
-    fn gen_map<'a>(&self, source: &'a Path, name: &str) -> (&'a Path, PathBuf) {
+    fn gen_map<'b>(&self, source: &'b Path, name: &str) -> (&'b Path, PathBuf) {
         let rel_location = source.strip_prefix(&self.source).unwrap().parent().unwrap();
         if let Some(prefix) = &self.prefix {
             //panic!("{}", &prefix);
@@ -318,6 +340,8 @@ pub mod tests {
             mime::IMAGE_GIF,
         ];
 
+        let no_hash = vec!["bell.svg", "eye.svg", "a/b/c/d/s/d/svg/10.svg"];
+
         let config = BusterBuilder::default()
             .source("./dist")
             .result("/tmp/prod2i")
@@ -325,6 +349,7 @@ pub mod tests {
             .copy(true)
             .follow_links(true)
             .prefix("/test")
+            .no_hash(no_hash.clone())
             .build()
             .unwrap();
 
@@ -332,6 +357,14 @@ pub mod tests {
         let mut files = Files::load();
 
         if let Some(prefix) = &config.prefix {
+            no_hash.iter().for_each(|file| {
+                files.map.iter().any(|(k, v)| {
+                    let dest = Path::new(&v[prefix.len()..]);
+                    let no_hash = Path::new(file);
+                    k == file && dest.exists() && no_hash.file_name() == dest.file_name()
+                });
+            });
+
             for (k, v) in files.map.drain() {
                 let src = Path::new(&k);
                 let dest = Path::new(&v[prefix.len()..]);
@@ -341,6 +374,28 @@ pub mod tests {
         }
 
         cleanup(&config);
+    }
+
+    #[test]
+    fn no_hash_validation_works() {
+        let types = vec![
+            mime::IMAGE_PNG,
+            mime::IMAGE_SVG,
+            mime::IMAGE_JPEG,
+            mime::IMAGE_GIF,
+        ];
+
+        let no_hash = vec!["bbell.svg", "eye.svg", "a/b/c/d/s/d/svg/10.svg"];
+        assert!(BusterBuilder::default()
+            .source("./dist")
+            .result("/tmp/prod2i")
+            .mime_types(types)
+            .copy(true)
+            .follow_links(true)
+            .prefix("/test")
+            .no_hash(no_hash.clone())
+            .build()
+            .is_err())
     }
 
     pub fn runner() {

@@ -1,5 +1,11 @@
 ## 0.2.0
 
+### Added:
+
+- `Buster.no_hash` Option to exclude select files from processing. These
+  files will be copied over without any processing for cache
+  busting(i.e, no renaming)
+
 ### Changed:
 
 - `Files::new()` takes a `&str`: Earlier versions were using
