@@ -55,7 +55,8 @@ pub struct Buster<'a> {
     #[builder(setter(into))]
     source: String,
     /// mime_types for hashing
-    mime_types: Vec<mime::Mime>,
+    #[builder(setter(into, strip_option), default)]
+    mime_types: Option<Vec<mime::Mime>>,
     /// directory for writing results
     #[builder(setter(into))]
     result: String,
@@ -127,29 +128,50 @@ impl<'a> Buster<'a> {
             let entry = entry?;
 
             let path = entry.path();
-            if !path.is_dir() && !self.no_hash.contains(&path.to_str().unwrap()) {
+            if !path.is_dir() {
                 let path = Path::new(&path);
 
-                for mime_type in self.mime_types.iter() {
-                    let file_mime = mime_guess::from_path(path)
-                        .first()
-                        .unwrap_or_else(|| panic!("couldn't resolve MIME for file: {:?}", &path));
-                    if &file_mime == mime_type {
-                        let contents = Self::read_to_string(&path).unwrap();
-                        let hash = Self::hasher(&contents);
-                        let new_name = format!(
+                let mut process_worker = |path: &Path| {
+                    let contents = Self::read_to_string(&path).unwrap();
+                    let hash = Self::hasher(&contents);
+                    let new_name = if self.no_hash.iter().any(|no_hash| {
+                        let no_hash = Path::new(&self.source).join(&no_hash);
+                        no_hash == path
+                    }) {
+                        format!(
+                            "{}.{}",
+                            path.file_stem().unwrap().to_str().unwrap(),
+                            path.extension().unwrap().to_str().unwrap()
+                        )
+                    } else {
+                        format!(
                             "{}.{}.{}",
                             path.file_stem().unwrap().to_str().unwrap(),
                             hash,
                             path.extension().unwrap().to_str().unwrap()
-                        );
-                        self.copy(path, &new_name);
-                        let (source, destination) = self.gen_map(path, &&new_name);
-                        let _ = file_map.add(
-                            source.to_str().unwrap().into(),
-                            destination.to_str().unwrap().into(),
-                        );
+                        )
+                    };
+                    self.copy(path, &new_name);
+                    let (source, destination) = self.gen_map(path, &&new_name);
+                    let _ = file_map.add(
+                        source.to_str().unwrap().into(),
+                        destination.to_str().unwrap().into(),
+                    );
+                };
+
+                match self.mime_types.as_ref() {
+                    Some(mime_types) => {
+                        for mime_type in mime_types.iter() {
+                            let file_mime =
+                                mime_guess::from_path(path).first().unwrap_or_else(|| {
+                                    panic!("couldn't resolve MIME for file: {:?}", &path)
+                                });
+                            if &file_mime == mime_type {
+                                process_worker(&path);
+                            }
+                        }
                     }
+                    None => process_worker(&path),
                 }
             }
         }
@@ -340,7 +362,7 @@ pub mod tests {
 
         let config = BusterBuilder::default()
             .source("./dist")
-            .result("/tmp/prod2i")
+            .result("/tmp/prod2i2")
             .mime_types(types)
             .copy(true)
             .follow_links(true)
@@ -354,11 +376,16 @@ pub mod tests {
 
         if let Some(prefix) = &config.prefix {
             no_hash.iter().for_each(|file| {
-                files.map.iter().any(|(k, v)| {
+                assert!(files.map.iter().any(|(k, v)| {
+                    let source = Path::new(k);
                     let dest = Path::new(&v[prefix.len()..]);
                     let no_hash = Path::new(file);
-                    k == file && dest.exists() && no_hash.file_name() == dest.file_name()
-                });
+                    let stat = source == &Path::new(&config.source).join(file)
+                        && dest.exists()
+                        && no_hash.file_name() == dest.file_name();
+                    println!("[{}] file: {}", stat, file);
+                    stat
+                }));
             });
 
             for (k, v) in files.map.drain() {
@@ -393,6 +420,29 @@ pub mod tests {
             .build()
             .is_err())
     }
+
+    //    #[test]
+    //    fn no_specific_mime() {
+    //        let no_hash = vec!["858fd6c482cc75111d54.module.wasm"];
+    //        let config = BusterBuilder::default()
+    //            .source("./dist")
+    //            .result("/tmp/prod2ii")
+    //            .copy(true)
+    //            .follow_links(true)
+    //            .no_hash(no_hash.clone())
+    //            .prefix("/test")
+    //            .build()
+    //            .unwrap();
+    //        config.process().unwrap();
+    //        let files = Files::load();
+    //        files.map.iter().any(|(k, v)| {
+    //            let dest = Path::new(&v[prefix.len()..]);
+    //            let no_hash = Path::new(file);
+    //            k == file && dest.exists() && no_hash.file_name() == dest.file_name()
+    //        });
+    //
+    //        cleanup(&config);
+    //    }
 
     pub fn runner() {
         prefix_works();
