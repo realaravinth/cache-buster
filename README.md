@@ -40,6 +40,8 @@ a file that it doesn't have. Pretty neat, isn't it?
 
 - [x] `SHA-256` based name generation during compile-time
 - [x] Processes files based on provided MIME filters
+- [x] Exclude certain files from processing based on file extensions
+  and/or file paths
 - [x] Exposes modified names to program during runtime
 - [x] Route prefixes(optional)
 
