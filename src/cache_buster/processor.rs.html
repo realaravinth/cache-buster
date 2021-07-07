@@ -419,6 +419,138 @@
 <span id="416">416</span>
 <span id="417">417</span>
 <span id="418">418</span>
+<span id="419">419</span>
+<span id="420">420</span>
+<span id="421">421</span>
+<span id="422">422</span>
+<span id="423">423</span>
+<span id="424">424</span>
+<span id="425">425</span>
+<span id="426">426</span>
+<span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
+<span id="431">431</span>
+<span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
+<span id="439">439</span>
+<span id="440">440</span>
+<span id="441">441</span>
+<span id="442">442</span>
+<span id="443">443</span>
+<span id="444">444</span>
+<span id="445">445</span>
+<span id="446">446</span>
+<span id="447">447</span>
+<span id="448">448</span>
+<span id="449">449</span>
+<span id="450">450</span>
+<span id="451">451</span>
+<span id="452">452</span>
+<span id="453">453</span>
+<span id="454">454</span>
+<span id="455">455</span>
+<span id="456">456</span>
+<span id="457">457</span>
+<span id="458">458</span>
+<span id="459">459</span>
+<span id="460">460</span>
+<span id="461">461</span>
+<span id="462">462</span>
+<span id="463">463</span>
+<span id="464">464</span>
+<span id="465">465</span>
+<span id="466">466</span>
+<span id="467">467</span>
+<span id="468">468</span>
+<span id="469">469</span>
+<span id="470">470</span>
+<span id="471">471</span>
+<span id="472">472</span>
+<span id="473">473</span>
+<span id="474">474</span>
+<span id="475">475</span>
+<span id="476">476</span>
+<span id="477">477</span>
+<span id="478">478</span>
+<span id="479">479</span>
+<span id="480">480</span>
+<span id="481">481</span>
+<span id="482">482</span>
+<span id="483">483</span>
+<span id="484">484</span>
+<span id="485">485</span>
+<span id="486">486</span>
+<span id="487">487</span>
+<span id="488">488</span>
+<span id="489">489</span>
+<span id="490">490</span>
+<span id="491">491</span>
+<span id="492">492</span>
+<span id="493">493</span>
+<span id="494">494</span>
+<span id="495">495</span>
+<span id="496">496</span>
+<span id="497">497</span>
+<span id="498">498</span>
+<span id="499">499</span>
+<span id="500">500</span>
+<span id="501">501</span>
+<span id="502">502</span>
+<span id="503">503</span>
+<span id="504">504</span>
+<span id="505">505</span>
+<span id="506">506</span>
+<span id="507">507</span>
+<span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+<span id="517">517</span>
+<span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
+<span id="524">524</span>
+<span id="525">525</span>
+<span id="526">526</span>
+<span id="527">527</span>
+<span id="528">528</span>
+<span id="529">529</span>
+<span id="530">530</span>
+<span id="531">531</span>
+<span id="532">532</span>
+<span id="533">533</span>
+<span id="534">534</span>
+<span id="535">535</span>
+<span id="536">536</span>
+<span id="537">537</span>
+<span id="538">538</span>
+<span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
+<span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
+<span id="550">550</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">/*
 * Copyright (C) 2021  Aravinth Manivannan &lt;realaravinth@batsense.net&gt;
@@ -469,6 +601,26 @@
 
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="kw-2">*</span>;
 
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>)]</span>
+<span class="doccomment">/// Items to avoid hash calculation.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// This is useful when serving vendor static files which are interlinked, where chaing</span>
+<span class="doccomment">/// file names should mean changing how the vendor files pulls its dependencies --- which are</span>
+<span class="doccomment">/// beyond the abilities of `cache_buster`.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// ```rust</span>
+<span class="doccomment">/// use cache_buster::NoHashCategory;</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// let extensions = NoHashCategory::FileExtentions(vec![&quot;wasm&quot;]);</span>
+<span class="doccomment">/// let files = NoHashCategory::FileExtentions(vec![&quot;swagger-ui-bundle.js&quot;, &quot;favicon-16x16.png&quot;]);</span>
+<span class="doccomment">/// ```</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">NoHashCategory</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// vector of file extensions that should be avoided for hash processing</span>
+    <span class="ident">FileExtentions</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span><span class="op">&gt;</span>),
+    <span class="doccomment">/// list of file paths that should be avoided for file processing</span>
+    <span class="ident">FilePaths</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span><span class="op">&gt;</span>),
+}
+
 <span class="doccomment">/// Configuration for setting up cache-busting</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Builder</span>)]</span>
 <span class="attribute">#[<span class="ident">builder</span>(<span class="ident">build_fn</span>(<span class="ident">validate</span> <span class="op">=</span> <span class="string">&quot;Self::validate&quot;</span>))]</span>
@@ -493,18 +645,22 @@
     <span class="doccomment">/// They will be copied over without including a hash in the filename</span>
     <span class="doccomment">/// Path should be relative to [self.source]</span>
     <span class="attribute">#[<span class="ident">builder</span>(<span class="ident">default</span>)]</span>
-    <span class="ident">no_hash</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span><span class="op">&gt;</span>,
+    <span class="ident">no_hash</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">NoHashCategory</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">BusterBuilder</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="kw">fn</span> <span class="ident">validate</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">String</span><span class="op">&gt;</span> {
-        <span class="kw">for</span> <span class="ident">file</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">no_hash</span>.<span class="ident">iter</span>() {
-            <span class="kw">for</span> <span class="ident">file</span> <span class="kw">in</span> <span class="ident">file</span>.<span class="ident">iter</span>() {
-                <span class="kw">if</span> <span class="op">!</span><span class="ident">Path::new</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">source</span>.<span class="ident">as_ref</span>().<span class="ident">unwrap</span>())
-                    .<span class="ident">join</span>(<span class="ident">file</span>)
-                    .<span class="ident">exists</span>()
-                {
-                    <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">&quot;File {} doesn&#39;t exist&quot;</span>, <span class="ident">file</span>));
+        <span class="kw">for</span> <span class="ident">no_hash_configs</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">no_hash</span>.<span class="ident">iter</span>() {
+            <span class="kw">for</span> <span class="ident">no_hash</span> <span class="kw">in</span> <span class="ident">no_hash_configs</span>.<span class="ident">iter</span>() {
+                <span class="kw">if</span> <span class="kw">let</span> <span class="ident">NoHashCategory::FilePaths</span>(<span class="ident">files</span>) <span class="op">=</span> <span class="ident">no_hash</span> {
+                    <span class="kw">for</span> <span class="ident">file</span> <span class="kw">in</span> <span class="ident">files</span>.<span class="ident">iter</span>() {
+                        <span class="kw">if</span> <span class="op">!</span><span class="ident">Path::new</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">source</span>.<span class="ident">as_ref</span>().<span class="ident">unwrap</span>())
+                            .<span class="ident">join</span>(<span class="ident">file</span>)
+                            .<span class="ident">exists</span>()
+                        {
+                            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">&quot;File {} doesn&#39;t exist&quot;</span>, <span class="ident">file</span>));
+                        }
+                    }
                 }
             }
         }
@@ -546,23 +702,64 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">process_worker</span> <span class="op">=</span> <span class="op">|</span><span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span><span class="op">|</span> {
             <span class="kw">let</span> <span class="ident">contents</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::read_to_string</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>).<span class="ident">unwrap</span>();
             <span class="kw">let</span> <span class="ident">hash</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::hasher</span>(<span class="kw-2">&amp;</span><span class="ident">contents</span>);
-            <span class="kw">let</span> <span class="ident">new_name</span> <span class="op">=</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">no_hash</span>.<span class="ident">iter</span>().<span class="ident">any</span>(<span class="op">|</span><span class="ident">no_hash</span><span class="op">|</span> {
-                <span class="kw">let</span> <span class="ident">no_hash</span> <span class="op">=</span> <span class="ident">Path::new</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">source</span>).<span class="ident">join</span>(<span class="kw-2">&amp;</span><span class="ident">no_hash</span>);
-                <span class="ident">no_hash</span> <span class="op">=</span><span class="op">=</span> <span class="ident">path</span>
-            }) {
-                <span class="macro">format!</span>(
-                    <span class="string">&quot;{}.{}&quot;</span>,
-                    <span class="ident">path</span>.<span class="ident">file_stem</span>().<span class="ident">unwrap</span>().<span class="ident">to_str</span>().<span class="ident">unwrap</span>(),
-                    <span class="ident">path</span>.<span class="ident">extension</span>().<span class="ident">unwrap</span>().<span class="ident">to_str</span>().<span class="ident">unwrap</span>()
-                )
-            } <span class="kw">else</span> {
-                <span class="macro">format!</span>(
-                    <span class="string">&quot;{}.{}.{}&quot;</span>,
-                    <span class="ident">path</span>.<span class="ident">file_stem</span>().<span class="ident">unwrap</span>().<span class="ident">to_str</span>().<span class="ident">unwrap</span>(),
-                    <span class="ident">hash</span>,
-                    <span class="ident">path</span>.<span class="ident">extension</span>().<span class="ident">unwrap</span>().<span class="ident">to_str</span>().<span class="ident">unwrap</span>()
-                )
+
+            <span class="kw">let</span> <span class="ident">get_name</span> <span class="op">=</span> <span class="op">|</span><span class="ident">no_hash</span>: <span class="ident">bool</span><span class="op">|</span> <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
+                <span class="kw">if</span> <span class="ident">no_hash</span> {
+                    <span class="macro">format!</span>(
+                        <span class="string">&quot;{}.{}&quot;</span>,
+                        <span class="ident">path</span>.<span class="ident">file_stem</span>().<span class="ident">unwrap</span>().<span class="ident">to_str</span>().<span class="ident">unwrap</span>(),
+                        <span class="ident">path</span>.<span class="ident">extension</span>().<span class="ident">unwrap</span>().<span class="ident">to_str</span>().<span class="ident">unwrap</span>()
+                    )
+                } <span class="kw">else</span> {
+                    <span class="macro">format!</span>(
+                        <span class="string">&quot;{}.{}.{}&quot;</span>,
+                        <span class="ident">path</span>.<span class="ident">file_stem</span>().<span class="ident">unwrap</span>().<span class="ident">to_str</span>().<span class="ident">unwrap</span>(),
+                        <span class="ident">hash</span>,
+                        <span class="ident">path</span>.<span class="ident">extension</span>().<span class="ident">unwrap</span>().<span class="ident">to_str</span>().<span class="ident">unwrap</span>()
+                    )
+                }
             };
+
+            <span class="kw">let</span> <span class="ident">no_hash_status</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">no_hash</span>.<span class="ident">iter</span>().<span class="ident">any</span>(<span class="op">|</span><span class="ident">no_hash</span><span class="op">|</span> {
+                <span class="kw">match</span> <span class="ident">no_hash</span> {
+                    <span class="ident">NoHashCategory::FilePaths</span>(<span class="ident">paths</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                        <span class="kw">let</span> <span class="ident">no_hash_status</span> <span class="op">=</span> <span class="ident">paths</span>
+                            .<span class="ident">iter</span>()
+                            .<span class="ident">any</span>(<span class="op">|</span><span class="ident">file_path</span><span class="op">|</span> <span class="ident">Path::new</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">source</span>).<span class="ident">join</span>(<span class="kw-2">&amp;</span><span class="ident">file_path</span>) <span class="op">=</span><span class="op">=</span> <span class="ident">path</span>);
+                        <span class="ident">no_hash_status</span>
+                    }
+                    <span class="ident">NoHashCategory::FileExtentions</span>(<span class="ident">extensions</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">no_hash_status</span> <span class="op">=</span> <span class="bool-val">false</span>;
+                        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">cur_extention</span>) <span class="op">=</span> <span class="ident">path</span>.<span class="ident">extension</span>() {
+                            <span class="comment">// .unwrap().to_str().unwrap();</span>
+                            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">cur_extention</span>) <span class="op">=</span> <span class="ident">cur_extention</span>.<span class="ident">to_str</span>() {
+                                <span class="ident">no_hash_status</span> <span class="op">=</span> <span class="ident">extensions</span>.<span class="ident">iter</span>().<span class="ident">any</span>(<span class="op">|</span><span class="ident">ext</span><span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">cur_extention</span> <span class="op">=</span><span class="op">=</span> <span class="ident">ext</span>);
+                            }
+                        }
+                        <span class="ident">no_hash_status</span>
+                    }
+                }
+            });
+
+            <span class="kw">let</span> <span class="ident">new_name</span> <span class="op">=</span> <span class="ident">get_name</span>(<span class="ident">no_hash_status</span>);
+
+            <span class="comment">//            let new_name = if self.no_hash.iter().any(|no_hash| {</span>
+            <span class="comment">//                let no_hash = Path::new(&amp;self.source).join(&amp;no_hash);</span>
+            <span class="comment">//                no_hash == path</span>
+            <span class="comment">//            }) {</span>
+            <span class="comment">//                format!(</span>
+            <span class="comment">//                    &quot;{}.{}&quot;,</span>
+            <span class="comment">//                    path.file_stem().unwrap().to_str().unwrap(),</span>
+            <span class="comment">//                    path.extension().unwrap().to_str().unwrap()</span>
+            <span class="comment">//                )</span>
+            <span class="comment">//            } else {</span>
+            <span class="comment">//                format!(</span>
+            <span class="comment">//                    &quot;{}.{}.{}&quot;,</span>
+            <span class="comment">//                    path.file_stem().unwrap().to_str().unwrap(),</span>
+            <span class="comment">//                    hash,</span>
+            <span class="comment">//                    path.extension().unwrap().to_str().unwrap()</span>
+            <span class="comment">//                )</span>
+            <span class="comment">//            };</span>
             <span class="self">self</span>.<span class="ident">copy</span>(<span class="ident">path</span>, <span class="kw-2">&amp;</span><span class="ident">new_name</span>);
             <span class="kw">let</span> (<span class="ident">source</span>, <span class="ident">destination</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">gen_map</span>(<span class="ident">path</span>, <span class="op">&amp;&amp;</span><span class="ident">new_name</span>);
             <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">file_map</span>.<span class="ident">add</span>(
@@ -735,7 +932,9 @@
             <span class="ident">mime::IMAGE_GIF</span>,
         ];
 
-        <span class="kw">let</span> <span class="ident">no_hash</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="string">&quot;bbell.svg&quot;</span>, <span class="string">&quot;eye.svg&quot;</span>, <span class="string">&quot;a/b/c/d/s/d/svg/10.svg&quot;</span>];
+        <span class="kw">let</span> <span class="ident">no_hash</span> <span class="op">=</span>
+            <span class="ident">NoHashCategory::FilePaths</span>(<span class="macro">vec!</span>[<span class="string">&quot;bbell.svg&quot;</span>, <span class="string">&quot;eye.svg&quot;</span>, <span class="string">&quot;a/b/c/d/s/d/svg/10.svg&quot;</span>]);
+
         <span class="macro">assert!</span>(<span class="ident">BusterBuilder::default</span>()
             .<span class="ident">source</span>(<span class="string">&quot;./dist&quot;</span>)
             .<span class="ident">result</span>(<span class="string">&quot;/tmp/prod2i&quot;</span>)
@@ -743,27 +942,28 @@
             .<span class="ident">copy</span>(<span class="bool-val">true</span>)
             .<span class="ident">follow_links</span>(<span class="bool-val">true</span>)
             .<span class="ident">prefix</span>(<span class="string">&quot;/test&quot;</span>)
-            .<span class="ident">no_hash</span>(<span class="ident">no_hash</span>.<span class="ident">clone</span>())
+            .<span class="ident">no_hash</span>(<span class="macro">vec!</span>[<span class="ident">no_hash</span>.<span class="ident">clone</span>()])
             .<span class="ident">build</span>()
             .<span class="ident">is_err</span>())
     }
 
     <span class="kw">fn</span> <span class="ident">no_specific_mime</span>() {
         <span class="ident">delete_file</span>();
-        <span class="kw">use</span> <span class="ident">std</span>::{<span class="ident">thread</span>, <span class="ident">time</span>};
+        <span class="comment">//use std::{thread, time};</span>
 
-        <span class="kw">let</span> <span class="ident">sleep</span> <span class="op">=</span> <span class="ident">time::Duration::from_secs</span>(<span class="number">4</span>);
+        <span class="comment">//let sleep = time::Duration::from_secs(4);</span>
 
-        <span class="ident">thread::sleep</span>(<span class="ident">sleep</span>);
+        <span class="comment">//thread::sleep(sleep);</span>
 
         <span class="kw">const</span> <span class="ident">WASM</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;858fd6c482cc75111d54.module.wasm&quot;</span>;
-        <span class="kw">let</span> <span class="ident">no_hash</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="ident">WASM</span>, <span class="string">&quot;bell.svg&quot;</span>, <span class="string">&quot;eye.svg&quot;</span>, <span class="string">&quot;a/b/c/d/s/d/svg/10.svg&quot;</span>];
+        <span class="kw">let</span> <span class="ident">no_hash_files</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="ident">WASM</span>, <span class="string">&quot;bell.svg&quot;</span>, <span class="string">&quot;eye.svg&quot;</span>, <span class="string">&quot;a/b/c/d/s/d/svg/10.svg&quot;</span>];
+        <span class="kw">let</span> <span class="ident">no_hash</span> <span class="op">=</span> <span class="ident">NoHashCategory::FilePaths</span>(<span class="ident">no_hash_files</span>.<span class="ident">clone</span>());
         <span class="kw">let</span> <span class="ident">config</span> <span class="op">=</span> <span class="ident">BusterBuilder::default</span>()
             .<span class="ident">source</span>(<span class="string">&quot;./dist&quot;</span>)
             .<span class="ident">result</span>(<span class="string">&quot;/tmp/prod2ii&quot;</span>)
             .<span class="ident">copy</span>(<span class="bool-val">true</span>)
             .<span class="ident">follow_links</span>(<span class="bool-val">true</span>)
-            .<span class="ident">no_hash</span>(<span class="ident">no_hash</span>.<span class="ident">clone</span>())
+            .<span class="ident">no_hash</span>(<span class="macro">vec!</span>[<span class="ident">no_hash</span>.<span class="ident">clone</span>()])
             .<span class="ident">build</span>()
             .<span class="ident">unwrap</span>();
         <span class="ident">config</span>.<span class="ident">process</span>().<span class="ident">unwrap</span>();
@@ -778,7 +978,7 @@
                 <span class="op">&amp;&amp;</span> <span class="ident">source</span>.<span class="ident">file_name</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">dest</span>.<span class="ident">file_name</span>()
         }));
 
-        <span class="ident">no_hash</span>.<span class="ident">iter</span>().<span class="ident">for_each</span>(<span class="op">|</span><span class="ident">file</span><span class="op">|</span> {
+        <span class="ident">no_hash_files</span>.<span class="ident">iter</span>().<span class="ident">for_each</span>(<span class="op">|</span><span class="ident">file</span><span class="op">|</span> {
             <span class="macro">assert!</span>(<span class="ident">files</span>.<span class="ident">map</span>.<span class="ident">iter</span>().<span class="ident">any</span>(<span class="op">|</span>(<span class="ident">k</span>, <span class="ident">v</span>)<span class="op">|</span> {
                 <span class="kw">let</span> <span class="ident">source</span> <span class="op">=</span> <span class="ident">Path::new</span>(<span class="ident">k</span>);
                 <span class="kw">let</span> <span class="ident">dest</span> <span class="op">=</span> <span class="ident">Path::new</span>(<span class="kw-2">&amp;</span><span class="ident">v</span>);
@@ -833,9 +1033,73 @@
         <span class="ident">cleanup</span>(<span class="kw-2">&amp;</span><span class="ident">config</span>);
     }
 
+    <span class="kw">fn</span> <span class="ident">no_hash_extension_works</span>() {
+        <span class="ident">delete_file</span>();
+        <span class="kw">use</span> <span class="ident">std</span>::{<span class="ident">thread</span>, <span class="ident">time</span>};
+
+        <span class="kw">let</span> <span class="ident">sleep</span> <span class="op">=</span> <span class="ident">time::Duration::from_secs</span>(<span class="number">4</span>);
+        <span class="kw">const</span> <span class="ident">APPLICATION_WASM</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;wasm&quot;</span>;
+        <span class="kw">const</span> <span class="ident">WASM</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;858fd6c482cc75111d54.module.wasm&quot;</span>;
+
+        <span class="ident">thread::sleep</span>(<span class="ident">sleep</span>);
+
+        <span class="kw">let</span> <span class="ident">no_hash_extensions</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="ident">APPLICATION_WASM</span>];
+        <span class="kw">let</span> <span class="ident">no_hash_ext</span> <span class="op">=</span> <span class="ident">NoHashCategory::FileExtentions</span>(<span class="ident">no_hash_extensions</span>.<span class="ident">clone</span>());
+
+        <span class="kw">let</span> <span class="ident">no_hash_paths</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="string">&quot;bell.svg&quot;</span>, <span class="string">&quot;eye.svg&quot;</span>, <span class="string">&quot;a/b/c/d/s/d/svg/10.svg&quot;</span>];
+        <span class="kw">let</span> <span class="ident">no_hash_cat</span> <span class="op">=</span> <span class="ident">NoHashCategory::FilePaths</span>(<span class="ident">no_hash_paths</span>.<span class="ident">clone</span>());
+        <span class="kw">let</span> <span class="ident">no_hash</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="ident">no_hash_cat</span>, <span class="ident">no_hash_ext</span>];
+
+        <span class="kw">let</span> <span class="ident">config</span> <span class="op">=</span> <span class="ident">BusterBuilder::default</span>()
+            .<span class="ident">source</span>(<span class="string">&quot;./dist&quot;</span>)
+            .<span class="ident">result</span>(<span class="string">&quot;/tmp/prodnohashextension&quot;</span>)
+            .<span class="ident">copy</span>(<span class="bool-val">true</span>)
+            .<span class="ident">follow_links</span>(<span class="bool-val">true</span>)
+            .<span class="ident">no_hash</span>(<span class="ident">no_hash</span>.<span class="ident">clone</span>())
+            .<span class="ident">build</span>()
+            .<span class="ident">unwrap</span>();
+        <span class="ident">config</span>.<span class="ident">process</span>().<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">files</span> <span class="op">=</span> <span class="ident">Files::load</span>();
+
+        <span class="macro">assert!</span>(<span class="ident">files</span>.<span class="ident">map</span>.<span class="ident">iter</span>().<span class="ident">any</span>(<span class="op">|</span>(<span class="ident">k</span>, <span class="ident">v</span>)<span class="op">|</span> {
+            <span class="kw">let</span> <span class="ident">dest</span> <span class="op">=</span> <span class="ident">Path::new</span>(<span class="kw-2">&amp;</span><span class="ident">v</span>);
+            <span class="ident">dest</span>.<span class="ident">extension</span>().<span class="ident">unwrap</span>().<span class="ident">to_str</span>().<span class="ident">unwrap</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">APPLICATION_WASM</span> <span class="op">&amp;&amp;</span> <span class="ident">dest</span>.<span class="ident">exists</span>()
+        }));
+
+        <span class="kw">let</span> <span class="ident">no_hash_file</span> <span class="op">=</span> <span class="ident">Path::new</span>(<span class="kw-2">&amp;</span><span class="ident">config</span>.<span class="ident">result</span>).<span class="ident">join</span>(<span class="ident">WASM</span>);
+        <span class="macro">assert!</span>(<span class="ident">files</span>.<span class="ident">map</span>.<span class="ident">iter</span>().<span class="ident">any</span>(<span class="op">|</span>(<span class="ident">k</span>, <span class="ident">v</span>)<span class="op">|</span> {
+            <span class="kw">let</span> <span class="ident">source</span> <span class="op">=</span> <span class="ident">Path::new</span>(<span class="kw-2">&amp;</span><span class="ident">config</span>.<span class="ident">source</span>).<span class="ident">join</span>(<span class="ident">k</span>);
+            <span class="kw">let</span> <span class="ident">dest</span> <span class="op">=</span> <span class="ident">Path::new</span>(<span class="kw-2">&amp;</span><span class="ident">v</span>);
+            <span class="ident">dest</span>.<span class="ident">file_name</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">no_hash_file</span>.<span class="ident">file_name</span>()
+                <span class="op">&amp;&amp;</span> <span class="ident">dest</span>.<span class="ident">exists</span>()
+                <span class="op">&amp;&amp;</span> <span class="ident">source</span>.<span class="ident">file_name</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">dest</span>.<span class="ident">file_name</span>()
+        }));
+
+        <span class="ident">no_hash_paths</span>.<span class="ident">iter</span>().<span class="ident">for_each</span>(<span class="op">|</span><span class="ident">file</span><span class="op">|</span> {
+            <span class="macro">assert!</span>(<span class="ident">files</span>.<span class="ident">map</span>.<span class="ident">iter</span>().<span class="ident">any</span>(<span class="op">|</span>(<span class="ident">k</span>, <span class="ident">v</span>)<span class="op">|</span> {
+                <span class="kw">let</span> <span class="ident">source</span> <span class="op">=</span> <span class="ident">Path::new</span>(<span class="ident">k</span>);
+                <span class="kw">let</span> <span class="ident">dest</span> <span class="op">=</span> <span class="ident">Path::new</span>(<span class="kw-2">&amp;</span><span class="ident">v</span>);
+                <span class="kw">let</span> <span class="ident">no_hash</span> <span class="op">=</span> <span class="ident">Path::new</span>(<span class="ident">file</span>);
+                <span class="ident">source</span> <span class="op">=</span><span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">Path::new</span>(<span class="kw-2">&amp;</span><span class="ident">config</span>.<span class="ident">source</span>).<span class="ident">join</span>(<span class="ident">file</span>)
+                    <span class="op">&amp;&amp;</span> <span class="ident">dest</span>.<span class="ident">exists</span>()
+                    <span class="op">&amp;&amp;</span> <span class="ident">no_hash</span>.<span class="ident">file_name</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">dest</span>.<span class="ident">file_name</span>()
+            }));
+        });
+
+        <span class="kw">for</span> (<span class="ident">k</span>, <span class="ident">v</span>) <span class="kw">in</span> <span class="ident">files</span>.<span class="ident">map</span>.<span class="ident">iter</span>() {
+            <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="ident">Path::new</span>(<span class="kw-2">&amp;</span><span class="ident">k</span>);
+            <span class="kw">let</span> <span class="ident">dest</span> <span class="op">=</span> <span class="ident">Path::new</span>(<span class="kw-2">&amp;</span><span class="ident">v</span>);
+
+            <span class="macro">assert_eq!</span>(<span class="ident">src</span>.<span class="ident">exists</span>(), <span class="ident">dest</span>.<span class="ident">exists</span>());
+        }
+
+        <span class="ident">cleanup</span>(<span class="kw-2">&amp;</span><span class="ident">config</span>);
+    }
+
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">runner</span>() {
         <span class="ident">prefix_works</span>();
         <span class="ident">no_specific_mime</span>();
+        <span class="ident">no_hash_extension_works</span>();
     }
 }
 </pre></div>

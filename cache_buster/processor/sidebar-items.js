@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["BusterBuilderError","Error type for BusterBuilder"]],"struct":[["Buster","Configuration for setting up cache-busting"],["BusterBuilder","Builder for `Buster`."]]});
+initSidebarItems({"enum":[["BusterBuilderError","Error type for BusterBuilder"],["NoHashCategory","Items to avoid hash calculation."]],"struct":[["Buster","Configuration for setting up cache-busting"],["BusterBuilder","Builder for `Buster`."]]});
