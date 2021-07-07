@@ -64,6 +64,7 @@
 
 pub mod processor;
 pub use processor::BusterBuilder;
+pub use processor::NoHashCategory;
 pub mod filemap;
 pub use filemap::Files;
 

@@ -47,6 +47,26 @@ use walkdir::WalkDir;
 
 use crate::*;
 
+#[derive(Debug, Clone)]
+/// Items to avoid hash calculation.
+///
+/// This is useful when serving vendor static files which are interlinked, where chaing
+/// file names should mean changing how the vendor files pulls its dependencies --- which are
+/// beyond the abilities of `cache_buster`.
+///
+/// ```rust
+/// use cache_buster::NoHashCategory;
+///
+/// let extensions = NoHashCategory::FileExtentions(vec!["wasm"]);
+/// let files = NoHashCategory::FileExtentions(vec!["swagger-ui-bundle.js", "favicon-16x16.png"]);
+/// ```
+pub enum NoHashCategory<'a> {
+    /// vector of file extensions that should be avoided for hash processing
+    FileExtentions(Vec<&'a str>),
+    /// list of file paths that should be avoided for file processing
+    FilePaths(Vec<&'a str>),
+}
+
 /// Configuration for setting up cache-busting
 #[derive(Debug, Clone, Builder)]
 #[builder(build_fn(validate = "Self::validate"))]
@@ -71,18 +91,22 @@ pub struct Buster<'a> {
     /// They will be copied over without including a hash in the filename
     /// Path should be relative to [self.source]
     #[builder(default)]
-    no_hash: Vec<&'a str>,
+    no_hash: Vec<NoHashCategory<'a>>,
 }
 
 impl<'a> BusterBuilder<'a> {
     fn validate(&self) -> Result<(), String> {
-        for file in self.no_hash.iter() {
-            for file in file.iter() {
-                if !Path::new(&self.source.as_ref().unwrap())
-                    .join(file)
-                    .exists()
-                {
-                    return Err(format!("File {} doesn't exist", file));
+        for no_hash_configs in self.no_hash.iter() {
+            for no_hash in no_hash_configs.iter() {
+                if let NoHashCategory::FilePaths(files) = no_hash {
+                    for file in files.iter() {
+                        if !Path::new(&self.source.as_ref().unwrap())
+                            .join(file)
+                            .exists()
+                        {
+                            return Err(format!("File {} doesn't exist", file));
+                        }
+                    }
                 }
             }
         }
@@ -124,23 +148,64 @@ impl<'a> Buster<'a> {
         let mut process_worker = |path: &Path| {
             let contents = Self::read_to_string(&path).unwrap();
             let hash = Self::hasher(&contents);
-            let new_name = if self.no_hash.iter().any(|no_hash| {
-                let no_hash = Path::new(&self.source).join(&no_hash);
-                no_hash == path
-            }) {
-                format!(
-                    "{}.{}",
-                    path.file_stem().unwrap().to_str().unwrap(),
-                    path.extension().unwrap().to_str().unwrap()
-                )
-            } else {
-                format!(
-                    "{}.{}.{}",
-                    path.file_stem().unwrap().to_str().unwrap(),
-                    hash,
-                    path.extension().unwrap().to_str().unwrap()
-                )
+
+            let get_name = |no_hash: bool| -> String {
+                if no_hash {
+                    format!(
+                        "{}.{}",
+                        path.file_stem().unwrap().to_str().unwrap(),
+                        path.extension().unwrap().to_str().unwrap()
+                    )
+                } else {
+                    format!(
+                        "{}.{}.{}",
+                        path.file_stem().unwrap().to_str().unwrap(),
+                        hash,
+                        path.extension().unwrap().to_str().unwrap()
+                    )
+                }
             };
+
+            let no_hash_status = self.no_hash.iter().any(|no_hash| {
+                match no_hash {
+                    NoHashCategory::FilePaths(paths) => {
+                        let no_hash_status = paths
+                            .iter()
+                            .any(|file_path| Path::new(&self.source).join(&file_path) == path);
+                        no_hash_status
+                    }
+                    NoHashCategory::FileExtentions(extensions) => {
+                        let mut no_hash_status = false;
+                        if let Some(cur_extention) = path.extension() {
+                            // .unwrap().to_str().unwrap();
+                            if let Some(cur_extention) = cur_extention.to_str() {
+                                no_hash_status = extensions.iter().any(|ext| &cur_extention == ext);
+                            }
+                        }
+                        no_hash_status
+                    }
+                }
+            });
+
+            let new_name = get_name(no_hash_status);
+
+            //            let new_name = if self.no_hash.iter().any(|no_hash| {
+            //                let no_hash = Path::new(&self.source).join(&no_hash);
+            //                no_hash == path
+            //            }) {
+            //                format!(
+            //                    "{}.{}",
+            //                    path.file_stem().unwrap().to_str().unwrap(),
+            //                    path.extension().unwrap().to_str().unwrap()
+            //                )
+            //            } else {
+            //                format!(
+            //                    "{}.{}.{}",
+            //                    path.file_stem().unwrap().to_str().unwrap(),
+            //                    hash,
+            //                    path.extension().unwrap().to_str().unwrap()
+            //                )
+            //            };
             self.copy(path, &new_name);
             let (source, destination) = self.gen_map(path, &&new_name);
             let _ = file_map.add(
@@ -313,7 +378,9 @@ pub mod tests {
             mime::IMAGE_GIF,
         ];
 
-        let no_hash = vec!["bbell.svg", "eye.svg", "a/b/c/d/s/d/svg/10.svg"];
+        let no_hash =
+            NoHashCategory::FilePaths(vec!["bbell.svg", "eye.svg", "a/b/c/d/s/d/svg/10.svg"]);
+
         assert!(BusterBuilder::default()
             .source("./dist")
             .result("/tmp/prod2i")
@@ -321,27 +388,28 @@ pub mod tests {
             .copy(true)
             .follow_links(true)
             .prefix("/test")
-            .no_hash(no_hash.clone())
+            .no_hash(vec![no_hash.clone()])
             .build()
             .is_err())
     }
 
     fn no_specific_mime() {
         delete_file();
-        use std::{thread, time};
+        //use std::{thread, time};
 
-        let sleep = time::Duration::from_secs(4);
+        //let sleep = time::Duration::from_secs(4);
 
-        thread::sleep(sleep);
+        //thread::sleep(sleep);
 
         const WASM: &str = "858fd6c482cc75111d54.module.wasm";
-        let no_hash = vec![WASM, "bell.svg", "eye.svg", "a/b/c/d/s/d/svg/10.svg"];
+        let no_hash_files = vec![WASM, "bell.svg", "eye.svg", "a/b/c/d/s/d/svg/10.svg"];
+        let no_hash = NoHashCategory::FilePaths(no_hash_files.clone());
         let config = BusterBuilder::default()
             .source("./dist")
             .result("/tmp/prod2ii")
             .copy(true)
             .follow_links(true)
-            .no_hash(no_hash.clone())
+            .no_hash(vec![no_hash.clone()])
             .build()
             .unwrap();
         config.process().unwrap();
@@ -356,7 +424,7 @@ pub mod tests {
                 && source.file_name() == dest.file_name()
         }));
 
-        no_hash.iter().for_each(|file| {
+        no_hash_files.iter().for_each(|file| {
             assert!(files.map.iter().any(|(k, v)| {
                 let source = Path::new(k);
                 let dest = Path::new(&v);
@@ -411,8 +479,72 @@ pub mod tests {
         cleanup(&config);
     }
 
+    fn no_hash_extension_works() {
+        delete_file();
+        use std::{thread, time};
+
+        let sleep = time::Duration::from_secs(4);
+        const APPLICATION_WASM: &str = "wasm";
+        const WASM: &str = "858fd6c482cc75111d54.module.wasm";
+
+        thread::sleep(sleep);
+
+        let no_hash_extensions = vec![APPLICATION_WASM];
+        let no_hash_ext = NoHashCategory::FileExtentions(no_hash_extensions.clone());
+
+        let no_hash_paths = vec!["bell.svg", "eye.svg", "a/b/c/d/s/d/svg/10.svg"];
+        let no_hash_cat = NoHashCategory::FilePaths(no_hash_paths.clone());
+        let no_hash = vec![no_hash_cat, no_hash_ext];
+
+        let config = BusterBuilder::default()
+            .source("./dist")
+            .result("/tmp/prodnohashextension")
+            .copy(true)
+            .follow_links(true)
+            .no_hash(no_hash.clone())
+            .build()
+            .unwrap();
+        config.process().unwrap();
+        let files = Files::load();
+
+        assert!(files.map.iter().any(|(k, v)| {
+            let dest = Path::new(&v);
+            dest.extension().unwrap().to_str().unwrap() == APPLICATION_WASM && dest.exists()
+        }));
+
+        let no_hash_file = Path::new(&config.result).join(WASM);
+        assert!(files.map.iter().any(|(k, v)| {
+            let source = Path::new(&config.source).join(k);
+            let dest = Path::new(&v);
+            dest.file_name() == no_hash_file.file_name()
+                && dest.exists()
+                && source.file_name() == dest.file_name()
+        }));
+
+        no_hash_paths.iter().for_each(|file| {
+            assert!(files.map.iter().any(|(k, v)| {
+                let source = Path::new(k);
+                let dest = Path::new(&v);
+                let no_hash = Path::new(file);
+                source == &Path::new(&config.source).join(file)
+                    && dest.exists()
+                    && no_hash.file_name() == dest.file_name()
+            }));
+        });
+
+        for (k, v) in files.map.iter() {
+            let src = Path::new(&k);
+            let dest = Path::new(&v);
+
+            assert_eq!(src.exists(), dest.exists());
+        }
+
+        cleanup(&config);
+    }
+
     pub fn runner() {
         prefix_works();
         no_specific_mime();
+        no_hash_extension_works();
     }
 }
