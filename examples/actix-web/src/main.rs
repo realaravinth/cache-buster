@@ -130,10 +130,10 @@ mod tests {
 
     #[actix_rt::test]
     async fn static_assets_work() {
-        let mut app = test::init_service(App::new().configure(services)).await;
+        let app = test::init_service(App::new().configure(services)).await;
 
         let img_resp = test::call_service(
-            &mut app,
+            &app,
             test::TestRequest::get()
                 .uri(
                     &crate::FILES
@@ -146,7 +146,7 @@ mod tests {
         assert_eq!(img_resp.status(), StatusCode::OK);
 
         let css_resp = test::call_service(
-            &mut app,
+            &app,
             test::TestRequest::get()
                 .uri(
                     &crate::FILES
@@ -159,7 +159,7 @@ mod tests {
         assert_eq!(css_resp.status(), StatusCode::OK);
 
         let favicon_resp = test::call_service(
-            &mut app,
+            &app,
             test::TestRequest::get().uri("/favicon.ico").to_request(),
         )
         .await;

@@ -118,6 +118,7 @@ impl<'a> Buster<'a> {
     // creates base_dir to output files to
     fn init(&self) -> Result<(), Error> {
         let res = Path::new(&self.result);
+        println!("cargo:rerun-if-changed={}", self.source);
         if res.exists() {
             fs::remove_dir_all(&self.result).unwrap();
         }
@@ -429,7 +430,7 @@ pub mod tests {
                 let source = Path::new(k);
                 let dest = Path::new(&v);
                 let no_hash = Path::new(file);
-                source == &Path::new(&config.source).join(file)
+                source == Path::new(&config.source).join(file)
                     && dest.exists()
                     && no_hash.file_name() == dest.file_name()
             }));
@@ -507,7 +508,7 @@ pub mod tests {
         config.process().unwrap();
         let files = Files::load();
 
-        assert!(files.map.iter().any(|(k, v)| {
+        assert!(files.map.iter().any(|(_k, v)| {
             let dest = Path::new(&v);
             dest.extension().unwrap().to_str().unwrap() == APPLICATION_WASM && dest.exists()
         }));
@@ -526,7 +527,7 @@ pub mod tests {
                 let source = Path::new(k);
                 let dest = Path::new(&v);
                 let no_hash = Path::new(file);
-                source == &Path::new(&config.source).join(file)
+                source == Path::new(&config.source).join(file)
                     && dest.exists()
                     && no_hash.file_name() == dest.file_name()
             }));
