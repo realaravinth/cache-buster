@@ -6,6 +6,8 @@
   files will be copied over without any processing for cache
   busting(i.e, no renaming)
 
+- `Buster.source` is tracked by cargo
+
 ### Changed:
 
 - `Files::new()` takes a `&str`: Earlier versions were using
