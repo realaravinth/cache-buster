@@ -56,5 +56,5 @@ cache-buster = { version = "0.2", git = "https://github.com/realaravinth/cache-b
 ## Examples:
 
 - See [acix-example](./examples/actix-web)
-- See [mCaptcha/guard](https://github.com/mCaptcha/guard) for use
+- See [mCaptcha/mcaptcha](https://github.com/mCaptcha/mcaptcha) for use
   with [Sailfish](https://crates.io/crates/sailfish) template engine.
