@@ -21,6 +21,9 @@
   is unset(i.e `None`), no mime based filtering is done and all files
   inside source directory is considered for processing.
 
+- `Files::get_full_path()` and `Files::get()` now accept `impl
+  AsRef<str>` for path argument.
+
 ### Fixed:
 
 - `Files::get()` now behaves as it is described in the documentation

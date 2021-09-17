@@ -14,7 +14,6 @@
 //!
 //! let files = Files::new(CACHE_BUSTER_DATA_FILE);
 //! ```
-
 use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
@@ -40,8 +39,8 @@ impl Files {
     ///
     /// If the modified filename path is `./prod/test.randomhash.svg`, it will
     /// output `/test.randomhash.svg`. For full path, see [get_full_path][Self::get_full_path].
-    pub fn get<'a>(&'a self, path: &'a str) -> Option<&'a str> {
-        if let Some(path) = self.map.get(path) {
+    pub fn get<'a, 'b>(&'b self, path: impl AsRef<str>) -> Option<&'b str> {
+        if let Some(path) = self.map.get(path.as_ref()) {
             Some(&path[self.base_dir.len()..])
             // Some(&path)
         } else {
@@ -53,8 +52,8 @@ impl Files {
     ///
     /// If the modified filename path is `./prod/test.randomhash.svg`, it will
     /// output `/prod/test.randomhash.svg`. For relative path, see [get][Self::get].
-    pub fn get_full_path<'a>(&'a self, path: &'a str) -> Option<&'a String> {
-        self.map.get(path)
+    pub fn get_full_path<'a, 'b>(&'b self, path: impl AsRef<str>) -> Option<&'b String> {
+        self.map.get(path.as_ref())
     }
 }
 
