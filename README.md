@@ -38,12 +38,12 @@ a file that it doesn't have. Pretty neat, isn't it?
 
 ## Features
 
-- [x] `SHA-256` based name generation during compile-time
-- [x] Processes files based on provided MIME filters
-- [x] Exclude certain files from processing based on file extensions
-  and/or file paths
-- [x] Exposes modified names to program during runtime
-- [x] Route prefixes(optional)
+-   [x] `SHA-256` based name generation during compile-time
+-   [x] Processes files based on provided MIME filters
+-   [x] Exclude certain files from processing based on file extensions
+        and/or file paths
+-   [x] Exposes modified names to program during runtime
+-   [x] Route prefixes(optional)
 
 ## Usage:
 
@@ -55,6 +55,6 @@ cache-buster = { version = "0.2", git = "https://github.com/realaravinth/cache-b
 
 ## Examples:
 
-- See [acix-example](./examples/actix-web)
-- See [mCaptcha/mcaptcha](https://github.com/mCaptcha/mcaptcha) for use
-  with [Sailfish](https://crates.io/crates/sailfish) template engine.
+-   See [acix-example](./examples/actix-web)
+-   See [mCaptcha/mcaptcha](https://github.com/mCaptcha/mcaptcha) for use
+    with [Sailfish](https://crates.io/crates/sailfish) template engine.

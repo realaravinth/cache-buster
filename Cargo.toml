@@ -2,8 +2,13 @@
 name = "cache-buster"
 version = "0.2.0"
 authors = ["realaravinth <realaravinth@batsense.net>"]
-edition = "2018"
 license = "MIT OR Apache-2.0"
+description = "Compiletime cache-busting web applications written in rust"
+keywords = ["cache-busting", "web", "caching", "http"]
+homepage = "https://github.com/realaravinth/cache-buster"
+repository = "https://github.com/realaravinth/cache-buster"
+readme = "README.md"
+edition = "2021"
 
 [workspace]
 members = [
@@ -19,7 +24,7 @@ path = "src/lib.rs"
 mime_guess = "2.0.3"
 mime = "0.3.16"
 
-sha2 = "0.9.3"
+sha2 = "0.10"
 
 derive_builder = "0.10.2"
 
