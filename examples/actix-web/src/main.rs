@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 
-use actix_web::body::Body;
+use actix_web::body::BoxBody;
 use actix_web::{get, http::header, web, HttpResponse, Responder};
 use actix_web::{App, HttpServer};
 use lazy_static::lazy_static;
@@ -19,7 +19,7 @@ lazy_static! {
     /// 2. create filemap
     pub static ref FILES: Files = {
         let map = include_str!("./cache_buster_data.json");
-        Files::new(&map)
+        Files::new(map)
     };
     pub static ref INDEX: String = index::get_index();
 }
@@ -53,9 +53,9 @@ struct Asset;
 fn handle_assets(path: &str) -> HttpResponse {
     match Asset::get(path) {
         Some(content) => {
-            let body: Body = match content {
-                Cow::Borrowed(bytes) => bytes.into(),
-                Cow::Owned(bytes) => bytes.into(),
+            let body: BoxBody = match content.data {
+                Cow::Borrowed(bytes) => BoxBody::new(bytes),
+                Cow::Owned(bytes) => BoxBody::new(bytes),
             };
 
             HttpResponse::Ok()
@@ -80,9 +80,10 @@ pub async fn static_files(path: web::Path<String>) -> impl Responder {
 
 #[get("/")]
 pub async fn serve_index() -> impl Responder {
+    let index: &str = &*INDEX;
     HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
-        .body(&*INDEX)
+        .body(index)
 }
 
 #[derive(RustEmbed)]
@@ -92,9 +93,9 @@ struct Favicons;
 fn handle_favicons(path: &str) -> HttpResponse {
     match Favicons::get(path) {
         Some(content) => {
-            let body: Body = match content {
-                Cow::Borrowed(bytes) => bytes.into(),
-                Cow::Owned(bytes) => bytes.into(),
+            let body: BoxBody = match content.data {
+                Cow::Borrowed(bytes) => BoxBody::new(bytes),
+                Cow::Owned(bytes) => BoxBody::new(bytes),
             };
 
             HttpResponse::Ok()
