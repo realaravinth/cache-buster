@@ -13,7 +13,6 @@ fn main() {
         .source("./static/cachable/")
         .result("./dist")
         .mime_types(types)
-        .copy(true)
         .follow_links(true)
         .build()
         .unwrap();

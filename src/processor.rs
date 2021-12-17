@@ -25,7 +25,6 @@
 //!     .source("./dist")
 //!     .result("./prod")
 //!     .mime_types(types)
-//!     .copy(true)
 //!     .follow_links(true)
 //!     .build()
 //!     .unwrap();
@@ -83,8 +82,6 @@ pub struct Buster<'a> {
     #[builder(setter(into, strip_option), default)]
     /// route prefixes
     prefix: Option<String>,
-    /// copy other non-hashed files from source dire to result dir?
-    copy: bool,
     /// follow symlinks?
     follow_links: bool,
     /// exclude these files for hashing.
@@ -147,7 +144,7 @@ impl<'a> Buster<'a> {
         let mut file_map: Files = Files::new(&self.result);
 
         let mut process_worker = |path: &Path| {
-            let contents = Self::read_to_string(&path).unwrap();
+            let contents = Self::read_to_string(path).unwrap();
             let hash = Self::hasher(&contents);
 
             let get_name = |no_hash: bool| -> String {
@@ -190,25 +187,8 @@ impl<'a> Buster<'a> {
 
             let new_name = get_name(no_hash_status);
 
-            //            let new_name = if self.no_hash.iter().any(|no_hash| {
-            //                let no_hash = Path::new(&self.source).join(&no_hash);
-            //                no_hash == path
-            //            }) {
-            //                format!(
-            //                    "{}.{}",
-            //                    path.file_stem().unwrap().to_str().unwrap(),
-            //                    path.extension().unwrap().to_str().unwrap()
-            //                )
-            //            } else {
-            //                format!(
-            //                    "{}.{}.{}",
-            //                    path.file_stem().unwrap().to_str().unwrap(),
-            //                    hash,
-            //                    path.extension().unwrap().to_str().unwrap()
-            //                )
-            //            };
             self.copy(path, &new_name);
-            let (source, destination) = self.gen_map(path, &&new_name);
+            let (source, destination) = self.gen_map(path, &new_name);
             let _ = file_map.add(
                 source.to_str().unwrap().into(),
                 destination.to_str().unwrap().into(),
@@ -233,11 +213,11 @@ impl<'a> Buster<'a> {
                                     panic!("couldn't resolve MIME for file: {:?}", &path)
                                 });
                             if &file_mime == mime_type {
-                                process_worker(&path);
+                                process_worker(path);
                             }
                         }
                     }
-                    None => process_worker(&path),
+                    None => process_worker(path),
                 }
             }
         }
@@ -296,7 +276,7 @@ impl<'a> Buster<'a> {
             let entry_path = Path::new(&entry_path);
 
             if entry_path.is_dir() && path != entry_path {
-                Self::create_dir_structure(&self, entry_path)?;
+                Self::create_dir_structure(self, entry_path)?;
             } else if entry_path.is_dir() {
                 let rel_location = entry_path.strip_prefix(&self.source).unwrap();
                 let destination = Path::new(&self.result).join(rel_location);
@@ -361,7 +341,7 @@ impl Files {
 pub mod tests {
     use super::*;
 
-    pub fn cleanup(config: &Buster) {
+    pub fn cleanup(config: &Buster<'_>) {
         let _ = fs::remove_dir_all(&config.result);
         delete_file();
     }
@@ -386,7 +366,6 @@ pub mod tests {
             .source("./dist")
             .result("/tmp/prod2i")
             .mime_types(types)
-            .copy(true)
             .follow_links(true)
             .prefix("/test")
             .no_hash(vec![no_hash.clone()])
@@ -408,7 +387,6 @@ pub mod tests {
         let config = BusterBuilder::default()
             .source("./dist")
             .result("/tmp/prod2ii")
-            .copy(true)
             .follow_links(true)
             .no_hash(vec![no_hash.clone()])
             .build()
@@ -459,7 +437,6 @@ pub mod tests {
             .source("./dist")
             .result("/tmp/prod2i")
             .mime_types(types)
-            .copy(true)
             .follow_links(true)
             .prefix("/test")
             .build()
@@ -500,7 +477,6 @@ pub mod tests {
         let config = BusterBuilder::default()
             .source("./dist")
             .result("/tmp/prodnohashextension")
-            .copy(true)
             .follow_links(true)
             .no_hash(no_hash.clone())
             .build()

@@ -31,7 +31,7 @@ pub struct Files {
 impl Files {
     /// Load filemap in main program. Should be called from main program
     pub fn new(map: &str) -> Self {
-        let res: Files = serde_json::from_str(&map).unwrap();
+        let res: Files = serde_json::from_str(map).unwrap();
         res
     }
 
@@ -39,7 +39,7 @@ impl Files {
     ///
     /// If the modified filename path is `./prod/test.randomhash.svg`, it will
     /// output `/test.randomhash.svg`. For full path, see [get_full_path][Self::get_full_path].
-    pub fn get<'a, 'b>(&'b self, path: impl AsRef<str>) -> Option<&'b str> {
+    pub fn get(&self, path: impl AsRef<str>) -> Option<&str> {
         if let Some(path) = self.map.get(path.as_ref()) {
             Some(&path[self.base_dir.len()..])
             // Some(&path)
@@ -52,7 +52,7 @@ impl Files {
     ///
     /// If the modified filename path is `./prod/test.randomhash.svg`, it will
     /// output `/prod/test.randomhash.svg`. For relative path, see [get][Self::get].
-    pub fn get_full_path<'a, 'b>(&'b self, path: impl AsRef<str>) -> Option<&'b String> {
+    pub fn get_full_path(&self, path: impl AsRef<str>) -> Option<&String> {
         self.map.get(path.as_ref())
     }
 }
@@ -81,7 +81,6 @@ mod tests {
             .source("./dist")
             .result("/tmp/prodsd2")
             .mime_types(types)
-            .copy(true)
             .follow_links(true)
             .build()
             .unwrap();
@@ -126,7 +125,6 @@ mod tests {
             .source("./dist")
             .result("/tmp/prod5")
             .mime_types(types)
-            .copy(true)
             .follow_links(true)
             .build()
             .unwrap();

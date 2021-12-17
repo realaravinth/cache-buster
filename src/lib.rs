@@ -40,7 +40,6 @@
 //!     .source("./dist")
 //!     .result("./prod")
 //!     .mime_types(types)
-//!     .copy(true)
 //!     .follow_links(true)
 //!     .build()
 //!     .unwrap();
